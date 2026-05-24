@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Habit Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="logo">
+      Habit Tracker
+      <span>atomic habits system</span>
+    </div>
+  </header>
+
+  <nav class="toolbar" aria-label="Main controls">
+    <div class="toolbar-inner">
+      <div class="toolbar-section">
+        <span class="toolbar-label">Mode</span>
+        <div class="toolbar-group">
+          <button id="mode-edit-btn" class="mode-btn" type="button" onclick="setAppMode('edit')">Edit</button>
+          <button id="mode-view-btn" class="mode-btn" type="button" onclick="setAppMode('view')">View</button>
+        </div>
+      </div>
+
+      <div class="toolbar-sep"></div>
+
+      <div class="toolbar-section">
+        <span class="toolbar-label">Sort by</span>
+        <div class="toolbar-group">
+          <button class="toolbar-btn" type="button" onclick="sortAllByPriority()">Priority</button>
+          <button class="toolbar-btn" type="button" onclick="sortAllByType('positive')">Positive</button>
+          <button class="toolbar-btn" type="button" onclick="sortAllByType('negative')">Negative</button>
+        </div>
+      </div>
+
+      <div class="toolbar-sep"></div>
+
+      <div class="toolbar-section">
+        <span class="toolbar-label">Template</span>
+        <div class="toolbar-group">
+          <button class="toolbar-btn toolbar-btn-danger" type="button" onclick="applyTemplate()">Load Example</button>
+        </div>
+      </div>
+
+      <div class="toolbar-sep"></div>
+
+      <div class="toolbar-section">
+        <span class="toolbar-label">Data</span>
+        <div class="toolbar-group">
+          <div class="toolbar-dropdown">
+            <button class="toolbar-btn toolbar-btn-caret" type="button" onclick="toggleExportMenu(event)">
+              Export <span class="btn-caret">&#9660;</span>
+            </button>
+            <div class="toolbar-dropdown-menu" id="export-menu">
+              <button type="button" onclick="exportJSON(); closeExportMenu()">JSON</button>
+              <button type="button" onclick="exportCSV(); closeExportMenu()">CSV</button>
+            </div>
+          </div>
+          <button class="toolbar-btn" type="button" onclick="triggerImport()">Import</button>
+        </div>
+        <input type="file" id="import-input" accept=".json,.csv" style="display:none" onchange="handleImport(event)" />
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="add-bar">
+      <input
+        id="new-cat"
+        type="text"
+        placeholder="New category name (e.g. Productivity, Morning routine...)"
+      />
+      <button id="add-cat-btn" class="btn-primary" type="button">+ Add Category</button>
+    </div>
+
+    <div id="app"></div>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
