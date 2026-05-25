@@ -24,13 +24,19 @@ function renderMicroViewTable(h) {
     </div>`;
 }
 
+export function renderWithCatGaps(cats) {
+    const gap = i =>
+        `<div class="cat-drop-gap" ondragover="onCatGapDragOver(event)" ondragleave="onCatGapDragLeave(event)" ondrop="onCatGapDrop(${i},event)"></div>`;
+    return gap(0) + cats.map((c, i) => renderCategoryView(c) + gap(i + 1)).join("");
+}
+
 function renderWithHabitGaps(c) {
     const gap = i =>
         `<div class="habit-drop-gap" ondragover="onHabitGapDragOver('${c.id}',event)" ondragleave="onHabitGapDragLeave(event)" ondrop="onHabitGapDrop('${c.id}',${i},event)"></div>`;
     return gap(0) + c.habits.map((h, i) => renderHabitView(c, h) + gap(i + 1)).join("");
 }
 
-export function renderHabitView(c, h) {
+function renderHabitView(c, h) {
     const typeBadge = h.type === "positive"
         ? `<span class="badge badge-pos">Positive</span>`
         : `<span class="badge badge-neg">Negative</span>`;

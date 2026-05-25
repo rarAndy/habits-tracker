@@ -74,6 +74,14 @@ export function handleImport(event) {
 function importJSON(text) {
     const parsed = JSON.parse(text);
     if (!Array.isArray(parsed)) throw new Error("Expected a JSON array of categories");
+    for (const cat of parsed) {
+        if (typeof cat.id !== "string" || typeof cat.name !== "string" || !Array.isArray(cat.habits))
+            throw new Error(`Invalid category structure: "${cat.name ?? cat.id}"`);
+        for (const hab of cat.habits) {
+            if (typeof hab.id !== "string" || typeof hab.name !== "string" || !Array.isArray(hab.microhabits))
+                throw new Error(`Invalid habit structure: "${hab.name ?? hab.id}"`);
+        }
+    }
     state.splice(0, state.length, ...parsed);
     saveState();
     window.dispatchEvent(new CustomEvent("habit-import"));

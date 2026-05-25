@@ -1,2 +1,5 @@
 .DS_Store
 Thumbs.db
+.claude/
+app-v1.js
+app-v1.ts

@@ -1,6 +1,6 @@
 import {
     state, appMode,
-    loadState, loadMode, persistMode,
+    loadState, loadMode, persistMode, setCurrentUser,
     addCategory, deleteCategory, toggleCategory,
     addHabit, deleteHabit, toggleHabit, updateHabit,
     addMicrohabit, deleteMicrohabit, updateMicrohabit,
@@ -10,9 +10,91 @@ import {
 } from './state.js';
 
 import { renderCategoryEdit } from './render-edit.js';
-import { renderCategoryView } from './render-view.js';
+import { renderWithCatGaps } from './render-view.js';
 import { exportJSON, exportCSV, triggerImport, handleImport } from './io.js';
 import { applyTemplate } from './template.js';
+import { signIn, signUp, signInWithGoogle, signOut, onAuthStateChange } from './auth.js';
+
+// ─── Auth UI ──────────────────────────────────────────────────────────────────
+
+let authTab = "signin";
+
+function showAuth() {
+    document.getElementById("auth-overlay")?.classList.remove("hidden");
+    document.getElementById("app-shell")?.classList.add("hidden");
+}
+
+function hideAuth() {
+    document.getElementById("auth-overlay")?.classList.add("hidden");
+    document.getElementById("app-shell")?.classList.remove("hidden");
+}
+
+function setAuthError(msg) {
+    const el = document.getElementById("auth-error");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.toggle("hidden", !msg);
+}
+
+function authSetTab(tab) {
+    authTab = tab;
+    document.querySelectorAll(".auth-tab").forEach(t =>
+        t.classList.toggle("active", t.dataset.tab === tab)
+    );
+    const btn = document.getElementById("auth-submit-btn");
+    if (btn) btn.textContent = tab === "signin" ? "Sign In" : "Sign Up";
+    setAuthError("");
+}
+
+async function authSubmit(e) {
+    e.preventDefault();
+    setAuthError("");
+    const email    = document.getElementById("auth-email").value;
+    const password = document.getElementById("auth-password").value;
+    const btn      = document.getElementById("auth-submit-btn");
+    btn.disabled   = true;
+    btn.textContent = "…";
+    try {
+        if (authTab === "signin") {
+            await signIn(email, password);
+        } else {
+            await signUp(email, password);
+            setAuthError("Check your email to confirm your account.");
+            btn.disabled    = false;
+            btn.textContent = "Sign Up";
+        }
+    } catch (err) {
+        setAuthError(err.message);
+        btn.disabled    = false;
+        btn.textContent = authTab === "signin" ? "Sign In" : "Sign Up";
+    }
+}
+
+async function authGoogle() {
+    setAuthError("");
+    try { await signInWithGoogle(); }
+    catch (err) { setAuthError(err.message); }
+}
+
+async function handleSignOut() {
+    try { await signOut(); }
+    catch (err) { console.error("Sign out failed:", err); }
+}
+
+// ─── Auth State ───────────────────────────────────────────────────────────────
+
+async function onSession(session) {
+    if (session) {
+        setCurrentUser(session.user.id);
+        await loadState();
+        loadMode();
+        render();
+        hideAuth();
+    } else {
+        setCurrentUser(null);
+        showAuth();
+    }
+}
 
 // ─── Mode ─────────────────────────────────────────────────────────────────────
 
@@ -107,28 +189,17 @@ function onCatDragEnd() {
     );
 }
 
-// ─── Category Gap Renderer ────────────────────────────────────────────────────
-
-function renderWithCatGaps(cats) {
-    const gap = i =>
-        `<div class="cat-drop-gap" ondragover="onCatGapDragOver(event)" ondragleave="onCatGapDragLeave(event)" ondrop="onCatGapDrop(${i},event)"></div>`;
-    return gap(0) + cats.map((c, i) => renderCategoryView(c) + gap(i + 1)).join("");
-}
-
 // ─── Main Render ──────────────────────────────────────────────────────────────
 
 function render() {
     const root = document.getElementById("app");
     if (!root) return;
 
-    // Sync toolbar active states and app mode class
-    root.classList.toggle("app--view", appMode === "view");
-    document.getElementById("mode-edit-btn")?.classList.toggle("active", appMode === "edit");
-    document.getElementById("mode-view-btn")?.classList.toggle("active", appMode === "view");
-
-    // Add-category bar only in edit mode
-    const addBar = document.querySelector(".add-bar");
-    if (addBar instanceof HTMLElement) addBar.style.display = appMode === "edit" ? "" : "none";
+    const isView = appMode === "view";
+    root.classList.toggle("app--view", isView);
+    document.body.classList.toggle("mode-view", isView);
+    document.getElementById("mode-edit-btn")?.classList.toggle("active", !isView);
+    document.getElementById("mode-view-btn")?.classList.toggle("active", isView);
 
     if (appMode === "view") {
         root.innerHTML = state.length
@@ -169,11 +240,11 @@ function closeExportMenu() {
 function attachUiHandlers() {
     document.getElementById("add-cat-btn")?.addEventListener("click", submitCategoryInput);
     document.getElementById("new-cat")?.addEventListener("keydown", handleCategoryInput);
+    document.getElementById("auth-form")?.addEventListener("submit", authSubmit);
     window.addEventListener("habit-import", () => { loadMode(); render(); });
     document.addEventListener("click", closeExportMenu);
 
-    // Suppress the "forbidden" X cursor when a category is being dragged over
-    // non-gap areas (category blocks, empty space). Gap divs handle their own dragover.
+    // Suppress the "forbidden" X cursor when dragging over non-gap areas.
     const appEl = document.getElementById("app");
     appEl?.addEventListener("dragover", e => {
         if (isCatDragging() || isHabitDragging()) e.preventDefault();
@@ -195,7 +266,7 @@ Object.assign(window, {
     updateHabit:      (cid, hid, f, v) => { if (updateHabit(cid, hid, f, v))               render(); },
     addMicrohabit:    (cid, hid)       => { addMicrohabit(cid, hid);                        render(); },
     deleteMicrohabit: (cid, hid, mid)  => { deleteMicrohabit(cid, hid, mid);                render(); },
-    updateMicrohabit, // saves only; no render needed for rating/description edits
+    updateMicrohabit,
     sortAllByPriority: () => { sortAllByPriority(); render(); },
     sortAllByType: type => { sortAllByType(type); render(); },
     onHabitDragStart,
@@ -215,11 +286,12 @@ Object.assign(window, {
     exportCSV,
     triggerImport,
     handleImport,
+    authSetTab,
+    authGoogle,
+    handleSignOut,
 });
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 
-loadState();
-loadMode();
-render();
 attachUiHandlers();
+onAuthStateChange(onSession);

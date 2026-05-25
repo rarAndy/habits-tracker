@@ -1,4 +1,5 @@
 import { uid } from './helpers.js';
+import { supabase } from './supabase.js';
 
 const STORAGE_KEY    = "habit-tracker-v1";
 const MODE_KEY       = "habit-tracker-mode";
@@ -6,18 +7,29 @@ const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 
 export let state   = [];
 export let appMode = "edit";
+let currentUserId  = null;
+
+export function setCurrentUser(userId) { currentUserId = userId; }
 
 // ─── Persistence ─────────────────────────────────────────────────────────────
 
-export function loadState() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        state = raw ? JSON.parse(raw) : [];
-    } catch { state = []; }
+export async function loadState() {
+    if (!currentUserId) { state = []; return; }
+    const { data, error } = await supabase
+        .from('habits_data')
+        .select('data')
+        .eq('user_id', currentUserId)
+        .maybeSingle();
+    if (error) throw error;
+    state = data?.data ?? [];
 }
 
 export function saveState() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* ignore */ }
+    if (!currentUserId) return;
+    supabase
+        .from('habits_data')
+        .upsert({ user_id: currentUserId, data: state, updated_at: new Date().toISOString() })
+        .then(({ error }) => { if (error) console.error('Save failed:', error); });
 }
 
 export function loadMode() {
@@ -44,7 +56,8 @@ export function addCategory(name) {
 
 export function deleteCategory(cid) {
     if (!confirm("Delete this category and all its habits?")) return false;
-    state = state.filter(c => c.id !== cid);
+    const idx = state.findIndex(c => c.id === cid);
+    if (idx !== -1) state.splice(idx, 1);
     saveState();
     return true;
 }
@@ -138,31 +151,30 @@ export function setDragSrc(cid, hid) { dragSrcCid = cid; dragSrcHid = hid; }
 export function clearDragSrc()       { dragSrcCid = null; dragSrcHid = null; }
 export function isHabitDragging()    { return dragSrcHid !== null; }
 
-export function insertHabitAt(cid, insertIndex) {
-    const c = findCategory(cid);
-    if (!c) return false;
-    const from = c.habits.findIndex(h => h.id === dragSrcHid);
-    if (from === -1) return false;
-    if (insertIndex === from || insertIndex === from + 1) return false;
-    const [moved] = c.habits.splice(from, 1);
-    const target = insertIndex > from ? insertIndex - 1 : insertIndex;
-    c.habits.splice(target, 0, moved);
-    saveState();
-    return true;
-}
-
 export let dragSrcCatId = null;
 export function setCatDragSrc(cid) { dragSrcCatId = cid; }
 export function clearCatDragSrc()  { dragSrcCatId = null; }
 export function isCatDragging()    { return dragSrcCatId !== null; }
 
+function insertAt(arr, from, insertIndex) {
+    if (insertIndex === from || insertIndex === from + 1) return false;
+    const [moved] = arr.splice(from, 1);
+    arr.splice(insertIndex > from ? insertIndex - 1 : insertIndex, 0, moved);
+    return true;
+}
+
+export function insertHabitAt(cid, insertIndex) {
+    const c = findCategory(cid);
+    if (!c) return false;
+    const from = c.habits.findIndex(h => h.id === dragSrcHid);
+    if (from === -1 || !insertAt(c.habits, from, insertIndex)) return false;
+    saveState();
+    return true;
+}
+
 export function insertCategoryAt(insertIndex) {
     const from = state.findIndex(c => c.id === dragSrcCatId);
-    if (from === -1) return false;
-    if (insertIndex === from || insertIndex === from + 1) return false; // same position
-    const [moved] = state.splice(from, 1);
-    const target = insertIndex > from ? insertIndex - 1 : insertIndex;
-    state.splice(target, 0, moved);
+    if (from === -1 || !insertAt(state, from, insertIndex)) return false;
     saveState();
     return true;
 }
