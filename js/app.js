@@ -59,9 +59,6 @@ async function authSubmit(e) {
             await signIn(email, password);
         } else {
             await signUp(email, password);
-            setAuthError("Check your email to confirm your account.");
-            btn.disabled    = false;
-            btn.textContent = "Sign Up";
         }
     } catch (err) {
         setAuthError(err.message);
