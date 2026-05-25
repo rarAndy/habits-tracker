@@ -7,6 +7,9 @@ export async function signUp(email, password) {
         options: { emailRedirectTo: window.location.origin },
     });
     if (error) throw error;
+    if (data.user?.identities?.length === 0) {
+        throw new Error("An account with this email already exists. Please sign in.");
+    }
     return data.session; // null when email confirmation is still required
 }
 
