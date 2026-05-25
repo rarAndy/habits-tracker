@@ -251,6 +251,12 @@ body {
 .p-med  { background: var(--p-med); }
 .p-high { background: var(--p-high); }
 
+.priority-label {
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: capitalize;
+}
+
 .chevron {
   font-size: 10px;
   color: var(--text3);

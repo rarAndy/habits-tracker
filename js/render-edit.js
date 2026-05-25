@@ -59,8 +59,7 @@ export function renderHabitEdit(c, h) {
           </label>
           <label class="field-label">Name
             <input type="text" value="${esc(h.name)}"
-              onchange="updateHabit('${c.id}','${h.id}','name',this.value)"
-              onblur="updateHabit('${c.id}','${h.id}','name',this.value)" />
+              onchange="updateHabit('${c.id}','${h.id}','name',this.value)" />
           </label>
           <label class="field-label">Priority
             <select onchange="updateHabit('${c.id}','${h.id}','priority',this.value)">
@@ -101,7 +100,7 @@ export function renderHabitEdit(c, h) {
         <span class="habit-type-col">${typeBadge}</span>
         <span class="habit-priority-col">
           <span class="priority-dot ${priorityClass(h.priority)}" title="Priority: ${h.priority}"></span>
-          <span style="font-size:11px;color:var(--text3);text-transform:capitalize">${h.priority}</span>
+          <span class="priority-label">${h.priority}</span>
         </span>
         <span class="chevron ${open ? "open" : ""}">&#9660;</span>
       </div>

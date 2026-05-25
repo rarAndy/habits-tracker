@@ -1,4 +1,4 @@
-import { esc, microLabels, microLabelHeader, priorityClass } from './helpers.js';
+import { esc, microLabels, microLabelHeader } from './helpers.js';
 
 function renderMicroViewTable(h) {
     if (!h.microhabits.length) return `<p class="empty-msg">No microhabits added yet.</p>`;

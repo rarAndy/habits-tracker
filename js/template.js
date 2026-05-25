@@ -226,8 +226,7 @@ export function applyTemplate() {
         "Load example template?\n\nThis will permanently replace all current categories, habits, and microhabits with preset example data.\n\nThis cannot be undone."
     )) return false;
 
-    state.length = 0;
-    buildTemplate().forEach(c => state.push(c));
+    state.splice(0, state.length, ...buildTemplate());
     saveState();
     return true;
 }

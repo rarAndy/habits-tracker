@@ -1,6 +1,6 @@
 import {
     state, appMode,
-    loadState, saveState, loadMode, persistMode,
+    loadState, loadMode, persistMode,
     addCategory, deleteCategory, toggleCategory,
     addHabit, deleteHabit, toggleHabit, updateHabit,
     addMicrohabit, deleteMicrohabit, updateMicrohabit,
@@ -17,7 +17,6 @@ import { applyTemplate } from './template.js';
 // ─── Mode ─────────────────────────────────────────────────────────────────────
 
 function setAppMode(mode) {
-    saveState(); // flush any pending changes before switching
     persistMode(mode);
     render();
 }

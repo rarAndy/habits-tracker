@@ -1,8 +1,8 @@
 import { uid } from './helpers.js';
 
-export const STORAGE_KEY    = "habit-tracker-v1";
-export const MODE_KEY       = "habit-tracker-mode";
-export const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
+const STORAGE_KEY    = "habit-tracker-v1";
+const MODE_KEY       = "habit-tracker-mode";
+const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 
 export let state   = [];
 export let appMode = "edit";
@@ -167,27 +167,3 @@ export function insertCategoryAt(insertIndex) {
     return true;
 }
 
-export function reorderCategory(toCid, insertBefore) {
-    if (dragSrcCatId === toCid) return false;
-    const from = state.findIndex(c => c.id === dragSrcCatId);
-    if (from === -1 || state.findIndex(c => c.id === toCid) === -1) return false;
-    const [moved] = state.splice(from, 1);
-    const newTo = state.findIndex(c => c.id === toCid);
-    state.splice(insertBefore ? newTo : newTo + 1, 0, moved);
-    saveState();
-    return true;
-}
-
-// Returns true if a reorder happened (caller should re-render).
-export function reorderHabit(toCid, toHid, insertBefore) {
-    if (dragSrcCid !== toCid || dragSrcHid === toHid) return false;
-    const c = findCategory(toCid);
-    if (!c) return false;
-    const from = c.habits.findIndex(h => h.id === dragSrcHid);
-    if (from === -1 || c.habits.findIndex(h => h.id === toHid) === -1) return false;
-    const [moved] = c.habits.splice(from, 1);
-    const newTo = c.habits.findIndex(h => h.id === toHid);
-    c.habits.splice(insertBefore ? newTo : newTo + 1, 0, moved);
-    saveState();
-    return true;
-}
