@@ -5,11 +5,15 @@ const STORAGE_KEY    = "habit-tracker-v1";
 const MODE_KEY       = "habit-tracker-mode";
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 
-export let state   = [];
-export let appMode = "edit";
-let currentUserId  = null;
+export let state        = [];
+export let appMode      = "edit";
+export let currentEmail = null;
+let currentUserId       = null;
 
-export function setCurrentUser(userId) { currentUserId = userId; }
+export function setCurrentUser(userId, email) {
+    currentUserId  = userId;
+    currentEmail   = email;
+}
 
 // ─── Persistence ─────────────────────────────────────────────────────────────
 
@@ -22,6 +26,7 @@ export async function loadState() {
         .maybeSingle();
     if (error) throw error;
     state = data?.data ?? [];
+    if (data === null) saveState(); // create row for new user immediately
 }
 
 export function saveState() {

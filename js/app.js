@@ -1,5 +1,5 @@
 import {
-    state, appMode,
+    state, appMode, currentEmail,
     loadState, loadMode, persistMode, setCurrentUser,
     addCategory, deleteCategory, toggleCategory,
     addHabit, deleteHabit, toggleHabit, updateHabit,
@@ -27,6 +27,15 @@ function showAuth() {
 function hideAuth() {
     document.getElementById("auth-overlay")?.classList.add("hidden");
     document.getElementById("app-shell")?.classList.remove("hidden");
+    const emailEl = document.getElementById("user-email");
+    if (emailEl) emailEl.textContent = currentEmail ?? "";
+}
+
+function setAuthStatus(msg) {
+    const el = document.getElementById("auth-status");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.toggle("hidden", !msg);
 }
 
 function setAuthError(msg) {
@@ -34,6 +43,13 @@ function setAuthError(msg) {
     if (!el) return;
     el.textContent = msg;
     el.classList.toggle("hidden", !msg);
+}
+
+function resetAuthBtn() {
+    const btn = document.getElementById("auth-submit-btn");
+    if (!btn) return;
+    btn.disabled    = false;
+    btn.textContent = authTab === "signin" ? "Sign In" : "Sign Up";
 }
 
 function authSetTab(tab) {
@@ -58,7 +74,12 @@ async function authSubmit(e) {
         if (authTab === "signin") {
             await signIn(email, password);
         } else {
-            await signUp(email, password);
+            const session = await signUp(email, password);
+            if (!session) {
+                setAuthError("Check your email to confirm your account.");
+                btn.disabled    = false;
+                btn.textContent = "Sign Up";
+            }
         }
     } catch (err) {
         setAuthError(err.message);
@@ -82,13 +103,23 @@ async function handleSignOut() {
 
 async function onSession(session) {
     if (session) {
-        setCurrentUser(session.user.id);
-        await loadState();
+        if (wasEmailConfirm) setAuthStatus("Authentication successful, logging in…");
+        setCurrentUser(session.user.id, session.user.email);
+        try {
+            await loadState();
+        } catch (err) {
+            console.error("loadState failed:", err);
+            setAuthError("Failed to load data: " + err.message);
+            setCurrentUser(null, null);
+            resetAuthBtn();
+            return;
+        }
         loadMode();
         render();
+        if (wasEmailConfirm) await new Promise(r => setTimeout(r, 1500));
         hideAuth();
     } else {
-        setCurrentUser(null);
+        setCurrentUser(null, null);
         showAuth();
     }
 }
@@ -289,6 +320,18 @@ Object.assign(window, {
 });
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
+
+// Detect when the page was opened from a Supabase email confirmation link.
+const wasEmailConfirm = (() => {
+    const hash  = new URLSearchParams(window.location.hash.slice(1));
+    const query = new URLSearchParams(window.location.search);
+    return hash.get('type') === 'signup' || query.get('type') === 'signup';
+})();
+
+if (wasEmailConfirm) {
+    setAuthStatus("Confirming your account…");
+    window.history.replaceState({}, '', window.location.pathname);
+}
 
 attachUiHandlers();
 onAuthStateChange(onSession);

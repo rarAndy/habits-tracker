@@ -24,7 +24,8 @@
         <button class="auth-tab"        data-tab="signup" type="button" onclick="authSetTab('signup')">Sign Up</button>
       </div>
 
-      <p id="auth-error" class="auth-error hidden"></p>
+      <p id="auth-status" class="auth-status hidden"></p>
+      <p id="auth-error"  class="auth-error hidden"></p>
 
       <form id="auth-form" class="auth-form">
         <input id="auth-email"    type="email"    placeholder="Email"    autocomplete="email"            required />
@@ -49,6 +50,7 @@
         Habit Tracker
         <span>atomic habits system</span>
       </div>
+      <span id="user-email" class="user-email"></span>
       <button class="sign-out-btn" type="button" onclick="handleSignOut()">Sign out</button>
     </header>
 

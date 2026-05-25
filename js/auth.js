@@ -1,8 +1,13 @@
 import { supabase } from './supabase.js';
 
 export async function signUp(email, password) {
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin },
+    });
     if (error) throw error;
+    return data.session; // null when email confirmation is still required
 }
 
 export async function signIn(email, password) {
