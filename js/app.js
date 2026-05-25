@@ -22,6 +22,12 @@ let authTab = "signin";
 function showAuth() {
     document.getElementById("auth-overlay")?.classList.remove("hidden");
     document.getElementById("app-shell")?.classList.add("hidden");
+    setAuthError("");
+    setAuthStatus("");
+    resetAuthBtn();
+    authSetTab("signin");
+    const pw = document.getElementById("auth-password");
+    if (pw) pw.value = "";
 }
 
 function hideAuth() {
