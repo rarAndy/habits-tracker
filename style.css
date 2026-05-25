@@ -122,6 +122,10 @@ body {
   overflow: hidden;
 }
 
+/* In view mode, gap divs own the spacing so margin becomes dead-zone-free */
+#app.app--view .category-block { margin-bottom: 0; }
+#app.app--view .habit-card { margin-bottom: 0; }
+
 .cat-header {
   display: flex;
   align-items: center;
@@ -667,12 +671,6 @@ body {
 
 .drag-handle:active { cursor: grabbing; }
 
-.view-habit-card.drag-over {
-  outline: 2px dashed var(--accent);
-  outline-offset: -2px;
-  background: var(--accent-lt);
-}
-
 .view-habit-card.dragging { opacity: 0.45; }
 
 /* ── Category Drag (View Mode) ───────────────────────────── */
@@ -682,10 +680,71 @@ body {
 
 .category-block.cat-dragging { opacity: 0.45; }
 
-.category-block.cat-drag-over {
-  outline: 2px dashed var(--accent);
-  outline-offset: -2px;
-  background: var(--accent-lt);
+/* ── Drop position indicators (shared by habits + categories) */
+.drop-before { box-shadow: 0 -3px 0 var(--accent); }
+.drop-after  { box-shadow: 0  3px 0 var(--accent); }
+
+/* ── Category gap drop zones ─────────────────────────────── */
+.cat-drop-gap {
+  height: 1.25rem;
+  position: relative;
+  transition: height 0.15s ease, margin-top 0.15s ease;
+}
+.cat-drop-gap.drop-active {
+  height: 2.5rem;
+  margin-top: -0.625rem;
+}
+.app--cat-dragging .cat-drop-gap:last-child {
+  height: 2.5rem;
+}
+.category-block {
+  transition: transform 0.15s ease;
+}
+.category-block.shift-up {
+  transform: translateY(-0.625rem);
+}
+.cat-drop-gap.drop-active::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+  box-shadow: 0 0 0 4px rgba(45, 90, 39, 0.1), 0 0 12px rgba(45, 90, 39, 0.3);
+}
+
+/* ── Habit gap drop zones ────────────────────────────────── */
+.habit-drop-gap {
+  height: 0.5rem;
+  position: relative;
+  transition: height 0.15s ease, margin-top 0.15s ease;
+}
+.category-block.habit-drag-active .habit-drop-gap.drop-active {
+  height: 1.75rem;
+  margin-top: -0.625rem;
+}
+.view-habit-card {
+  transition: transform 0.15s ease;
+}
+.view-habit-card.shift-up {
+  transform: translateY(-0.625rem);
+}
+.habit-drop-gap.drop-active::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+  box-shadow: 0 0 0 4px rgba(45, 90, 39, 0.1), 0 0 12px rgba(45, 90, 39, 0.3);
 }
 
 /* ── Priority Pill (View Mode) ───────────────────────────── */

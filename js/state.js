@@ -136,33 +136,58 @@ export let dragSrcHid = null;
 
 export function setDragSrc(cid, hid) { dragSrcCid = cid; dragSrcHid = hid; }
 export function clearDragSrc()       { dragSrcCid = null; dragSrcHid = null; }
+export function isHabitDragging()    { return dragSrcHid !== null; }
+
+export function insertHabitAt(cid, insertIndex) {
+    const c = findCategory(cid);
+    if (!c) return false;
+    const from = c.habits.findIndex(h => h.id === dragSrcHid);
+    if (from === -1) return false;
+    if (insertIndex === from || insertIndex === from + 1) return false;
+    const [moved] = c.habits.splice(from, 1);
+    const target = insertIndex > from ? insertIndex - 1 : insertIndex;
+    c.habits.splice(target, 0, moved);
+    saveState();
+    return true;
+}
 
 export let dragSrcCatId = null;
 export function setCatDragSrc(cid) { dragSrcCatId = cid; }
 export function clearCatDragSrc()  { dragSrcCatId = null; }
 export function isCatDragging()    { return dragSrcCatId !== null; }
 
-export function reorderCategory(toCid) {
+export function insertCategoryAt(insertIndex) {
+    const from = state.findIndex(c => c.id === dragSrcCatId);
+    if (from === -1) return false;
+    if (insertIndex === from || insertIndex === from + 1) return false; // same position
+    const [moved] = state.splice(from, 1);
+    const target = insertIndex > from ? insertIndex - 1 : insertIndex;
+    state.splice(target, 0, moved);
+    saveState();
+    return true;
+}
+
+export function reorderCategory(toCid, insertBefore) {
     if (dragSrcCatId === toCid) return false;
     const from = state.findIndex(c => c.id === dragSrcCatId);
-    const to   = state.findIndex(c => c.id === toCid);
-    if (from === -1 || to === -1) return false;
+    if (from === -1 || state.findIndex(c => c.id === toCid) === -1) return false;
     const [moved] = state.splice(from, 1);
-    state.splice(to, 0, moved);
+    const newTo = state.findIndex(c => c.id === toCid);
+    state.splice(insertBefore ? newTo : newTo + 1, 0, moved);
     saveState();
     return true;
 }
 
 // Returns true if a reorder happened (caller should re-render).
-export function reorderHabit(toCid, toHid) {
+export function reorderHabit(toCid, toHid, insertBefore) {
     if (dragSrcCid !== toCid || dragSrcHid === toHid) return false;
     const c = findCategory(toCid);
     if (!c) return false;
     const from = c.habits.findIndex(h => h.id === dragSrcHid);
-    const to   = c.habits.findIndex(h => h.id === toHid);
-    if (from === -1 || to === -1) return false;
+    if (from === -1 || c.habits.findIndex(h => h.id === toHid) === -1) return false;
     const [moved] = c.habits.splice(from, 1);
-    c.habits.splice(to, 0, moved);
+    const newTo = c.habits.findIndex(h => h.id === toHid);
+    c.habits.splice(insertBefore ? newTo : newTo + 1, 0, moved);
     saveState();
     return true;
 }

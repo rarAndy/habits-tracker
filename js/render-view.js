@@ -24,6 +24,12 @@ function renderMicroViewTable(h) {
     </div>`;
 }
 
+function renderWithHabitGaps(c) {
+    const gap = i =>
+        `<div class="habit-drop-gap" ondragover="onHabitGapDragOver('${c.id}',event)" ondragleave="onHabitGapDragLeave(event)" ondrop="onHabitGapDrop('${c.id}',${i},event)"></div>`;
+    return gap(0) + c.habits.map((h, i) => renderHabitView(c, h) + gap(i + 1)).join("");
+}
+
 export function renderHabitView(c, h) {
     const typeBadge = h.type === "positive"
         ? `<span class="badge badge-pos">Positive</span>`
@@ -50,9 +56,6 @@ export function renderHabitView(c, h) {
     <div class="habit-card view-habit-card" id="habit-${h.id}"
       draggable="true"
       ondragstart="onHabitDragStart('${c.id}','${h.id}',event)"
-      ondragover="onHabitDragOver(event)"
-      ondragleave="onHabitDragLeave(event)"
-      ondrop="onHabitDrop('${c.id}','${h.id}',event)"
       ondragend="onHabitDragEnd(event)">
       <div class="habit-header view-habit-header" onclick="toggleHabit('${c.id}','${h.id}')">
         <span class="drag-handle" title="Drag to reorder">⠿</span>
@@ -71,7 +74,7 @@ export function renderCategoryView(c) {
     const body = c.open ? `
       <div class="cat-body">
         ${c.habits.length
-            ? c.habits.map(h => renderHabitView(c, h)).join("")
+            ? renderWithHabitGaps(c)
             : `<p class="empty-msg">No habits yet.</p>`}
       </div>` : "";
 
@@ -79,9 +82,6 @@ export function renderCategoryView(c) {
     <div class="category-block" id="cat-${c.id}"
       draggable="true"
       ondragstart="onCatDragStart('${c.id}',event)"
-      ondragover="onCatDragOver(event)"
-      ondragleave="onCatDragLeave(event)"
-      ondrop="onCatDrop('${c.id}',event)"
       ondragend="onCatDragEnd()">
       <div class="cat-header">
         <span class="drag-handle cat-drag-handle" title="Drag to reorder">⠿</span>
