@@ -53,13 +53,18 @@
         Habit Tracker
         <span>atomic habits system</span>
       </div>
-      <button id="profile-btn" class="profile-btn" type="button" title="Profile">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="8" r="4"/>
-          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-        </svg>
-      </button>
-      <button class="sign-out-btn" type="button" onclick="handleSignOut()">Sign out</button>
+      <div class="profile-wrap">
+        <button id="profile-btn" class="profile-btn" type="button" onclick="toggleProfileMenu(event)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </button>
+        <div id="profile-menu" class="profile-menu">
+          <a href="profile.html" class="profile-menu-item">Edit Profile</a>
+          <button class="profile-menu-item profile-menu-danger" type="button" onclick="handleSignOut()">Sign Out</button>
+        </div>
+      </div>
     </header>
 
     <nav class="toolbar" aria-label="Main controls">

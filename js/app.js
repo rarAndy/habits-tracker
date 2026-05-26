@@ -282,12 +282,21 @@ function closeExportMenu() {
     document.getElementById("export-menu")?.classList.remove("open");
 }
 
+function toggleProfileMenu(e) {
+    e.stopPropagation();
+    document.getElementById("profile-menu")?.classList.toggle("open");
+}
+
+function closeProfileMenu() {
+    document.getElementById("profile-menu")?.classList.remove("open");
+}
+
 function attachUiHandlers() {
     document.getElementById("add-cat-btn")?.addEventListener("click", submitCategoryInput);
     document.getElementById("new-cat")?.addEventListener("keydown", handleCategoryInput);
     document.getElementById("auth-form")?.addEventListener("submit", authSubmit);
     window.addEventListener("habit-import", () => { loadMode(); render(); });
-    document.addEventListener("click", closeExportMenu);
+    document.addEventListener("click", () => { closeExportMenu(); closeProfileMenu(); });
 
     // Suppress the "forbidden" X cursor when dragging over non-gap areas.
     const appEl = document.getElementById("app");
@@ -334,6 +343,7 @@ Object.assign(window, {
     authSetTab,
     authGoogle,
     handleSignOut,
+    toggleProfileMenu,
 });
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
