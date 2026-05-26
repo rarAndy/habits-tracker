@@ -1094,6 +1094,41 @@ body.mode-view .add-bar { display: none; }
 }
 
 /* ── View Mode Habit Cards ───────────────────────────────── */
+.habit-check {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border2);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.habit-check svg { width: 11px; height: 11px; }
+.habit-check:hover { border-color: var(--accent); color: var(--accent); }
+.habit-check.done {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.habit-streak {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-lt);
+  border: 1px solid #c0d9be;
+  border-radius: 20px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.habit-streak::before { content: '🔥 '; }
+
 .view-habit-card { cursor: default; }
 
 .view-habit-header { cursor: pointer; }

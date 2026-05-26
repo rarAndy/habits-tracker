@@ -1,4 +1,5 @@
 import { esc, microLabels, microLabelHeader } from './helpers.js';
+import { isCompletedToday, getStreak } from './completions.js';
 
 function renderMicroViewTable(h) {
     if (!h.microhabits.length) return `<p class="empty-msg">No microhabits added yet.</p>`;
@@ -40,7 +41,9 @@ function renderHabitView(c, h) {
     const typeBadge = h.type === "positive"
         ? `<span class="badge badge-pos">Positive</span>`
         : `<span class="badge badge-neg">Negative</span>`;
-    const open = h.open !== false;
+    const open   = h.open !== false;
+    const done   = isCompletedToday(h.id);
+    const streak = getStreak(h.id);
 
     const loopFields = [
         h.cue      && `<div class="view-field"><span class="view-field-label">Cue</span><span class="view-field-value">${esc(h.cue)}</span></div>`,
@@ -70,6 +73,14 @@ function renderHabitView(c, h) {
         <span class="habit-priority-col">
           <span class="priority-pill priority-pill-${h.priority}">${h.priority}</span>
         </span>
+        ${streak > 0 ? `<span class="habit-streak">${streak}</span>` : ''}
+        <button class="habit-check${done ? ' done' : ''}"
+          onclick="event.stopPropagation(); checkHabit('${h.id}')"
+          title="${done ? 'Mark incomplete' : 'Mark complete'}">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="1.5,6 4.5,9.5 10.5,2.5"/>
+          </svg>
+        </button>
         <span class="chevron ${open ? "open" : ""}">&#9660;</span>
       </div>
       ${body}

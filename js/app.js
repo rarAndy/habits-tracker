@@ -11,6 +11,7 @@ import {
 
 import { renderCategoryEdit } from './render-edit.js';
 import { renderWithCatGaps } from './render-view.js';
+import { loadCompletions, toggleCompletion } from './completions.js';
 import { exportJSON, exportCSV, triggerImport, handleImport } from './io.js';
 import { applyTemplate } from './template.js';
 import { signOut, onAuthStateChange } from './auth.js';
@@ -31,6 +32,11 @@ async function onSession(session) {
         console.error("loadState failed:", err);
         window.location.replace('/login');
         return;
+    }
+    try {
+        await loadCompletions(session.user.id);
+    } catch (err) {
+        console.error("loadCompletions failed:", err);
     }
     loadMode();
     render();
@@ -226,6 +232,7 @@ Object.assign(window, {
     onCatGapDragLeave,
     onCatGapDrop,
     onCatDragEnd,
+    checkHabit: async (hid) => { await toggleCompletion(hid); render(); },
     applyTemplate: () => { if (applyTemplate()) { persistMode('view'); render(); } },
     toggleExportMenu,
     closeExportMenu,
