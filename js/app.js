@@ -22,6 +22,13 @@ import { signOut, onAuthStateChange } from './auth.js';
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
 const THEME_KEY = 'loopabl-theme';
+const SIDEBAR_KEY = 'loopabl-sidebar';
+
+function toggleSidebar() {
+    const isClosed = document.body.classList.toggle('sidebar-closed');
+    localStorage.setItem(SIDEBAR_KEY, isClosed ? 'closed' : 'open');
+    renderTopbar();
+}
 
 function loadTheme() {
     const saved = localStorage.getItem(THEME_KEY);
@@ -304,7 +311,9 @@ function renderTopbar() {
         `${i > 0 ? '<span class="sb-crumb-sep">/</span>' : ''}<span class="sb-crumb ${i === crumbs.length - 1 ? 'active' : 'dim'}">${esc(c)}</span>`
     ).join('');
 
+    const sidebarIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>`;
     topbar.innerHTML = `
+      <button class="sb-search-trigger" onclick="toggleSidebar()" title="Toggle sidebar" style="padding:0 8px;margin-right:2px">${sidebarIcon}</button>
       <div class="sb-crumbs">${crumbsHtml}</div>
       <div class="sb-topbar-spacer"></div>
       <button class="sb-search-trigger">
@@ -466,6 +475,7 @@ function attachAddCatHandlers() {
 
 function attachUiHandlers() {
     loadTheme();
+    if (localStorage.getItem(SIDEBAR_KEY) === 'closed') document.body.classList.add('sidebar-closed');
     window.addEventListener("habit-import", () => { loadMode(); render(); });
     document.addEventListener("click", () => { closeExportMenu(); closeProfileMenu(); });
 
@@ -517,6 +527,7 @@ Object.assign(window, {
     handleSignOut,
     toggleProfileMenu,
     toggleTheme,
+    toggleSidebar,
 });
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────

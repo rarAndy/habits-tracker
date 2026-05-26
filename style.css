@@ -1383,6 +1383,12 @@ body.lab *, body.lab *::before, body.lab *::after { box-sizing: border-box; }
   display: flex; flex-direction: column;
   padding: 4px 6px 8px;
   overflow-y: auto;
+  transition: width 0.22s ease, padding 0.22s ease;
+}
+
+body.sidebar-closed .sb {
+  width: 0; padding: 0;
+  overflow: hidden; min-width: 0;
 }
 
 .sb-brand { padding: 8px 6px 6px; }

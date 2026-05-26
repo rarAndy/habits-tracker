@@ -16,7 +16,7 @@
   </script>
 </head>
 <body class="lab">
-  <script>try { const t=localStorage.getItem('loopabl-theme'); if(t==='light')document.body.classList.add('light'); else if(t==='catppuccin')document.body.classList.add('catppuccin'); } catch(e) {}</script>
+  <script>try { const t=localStorage.getItem('loopabl-theme'); if(t==='light')document.body.classList.add('light'); else if(t==='catppuccin')document.body.classList.add('catppuccin'); if(localStorage.getItem('loopabl-sidebar')==='closed')document.body.classList.add('sidebar-closed'); } catch(e) {}</script>
 
   <div class="ss-root">
     <!-- Sidebar -->
