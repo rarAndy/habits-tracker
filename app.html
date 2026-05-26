@@ -16,7 +16,7 @@
   </script>
 </head>
 <body class="lab">
-  <script>try { if (localStorage.getItem('loopabl-theme') === 'light') document.body.classList.add('light'); } catch(e) {}</script>
+  <script>try { const t=localStorage.getItem('loopabl-theme'); if(t==='light')document.body.classList.add('light'); else if(t==='catppuccin')document.body.classList.add('catppuccin'); } catch(e) {}</script>
 
   <div class="ss-root">
     <!-- Sidebar -->

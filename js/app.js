@@ -24,21 +24,39 @@ import { signOut, onAuthStateChange } from './auth.js';
 const THEME_KEY = 'loopabl-theme';
 
 function loadTheme() {
-    if (localStorage.getItem(THEME_KEY) === 'light') document.body.classList.add('light');
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light') document.body.classList.add('light');
+    else if (saved === 'catppuccin') document.body.classList.add('catppuccin');
 }
 
 function toggleTheme() {
-    const isLight = document.body.classList.toggle('light');
-    localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark');
+    const body = document.body;
+    if (body.classList.contains('light')) {
+        body.classList.remove('light');
+        body.classList.add('catppuccin');
+        localStorage.setItem(THEME_KEY, 'catppuccin');
+    } else if (body.classList.contains('catppuccin')) {
+        body.classList.remove('catppuccin');
+        localStorage.setItem(THEME_KEY, 'dark');
+    } else {
+        body.classList.add('light');
+        localStorage.setItem(THEME_KEY, 'light');
+    }
     renderTopbar();
 }
 
-function iconSunToggle() {
-    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+function currentThemeIcon() {
+    if (document.body.classList.contains('light'))
+        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+    if (document.body.classList.contains('catppuccin'))
+        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`;
+    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
 }
 
-function iconMoonToggle() {
-    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+function currentThemeTitle() {
+    if (document.body.classList.contains('light')) return 'Light — click for Catppuccin';
+    if (document.body.classList.contains('catppuccin')) return 'Catppuccin — click for dark';
+    return 'Dark — click for light';
 }
 
 // ─── View State ───────────────────────────────────────────────────────────────
@@ -286,7 +304,6 @@ function renderTopbar() {
         `${i > 0 ? '<span class="sb-crumb-sep">/</span>' : ''}<span class="sb-crumb ${i === crumbs.length - 1 ? 'active' : 'dim'}">${esc(c)}</span>`
     ).join('');
 
-    const isLightNow = document.body.classList.contains('light');
     topbar.innerHTML = `
       <div class="sb-crumbs">${crumbsHtml}</div>
       <div class="sb-topbar-spacer"></div>
@@ -295,8 +312,8 @@ function renderTopbar() {
         Search
         <span class="kbd">⌘K</span>
       </button>
-      <button class="sb-search-trigger" onclick="toggleTheme()" title="${isLightNow ? 'Switch to dark' : 'Switch to light'}" style="padding:0 8px">
-        ${isLightNow ? iconMoonToggle() : iconSunToggle()}
+      <button class="sb-search-trigger" onclick="toggleTheme()" title="${currentThemeTitle()}" style="padding:0 8px">
+        ${currentThemeIcon()}
       </button>
       ${actions}
       ${activeView === 'habits' && appMode === 'edit' ? `
