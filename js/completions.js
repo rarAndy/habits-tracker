@@ -51,6 +51,41 @@ export function getStreak(habitId) {
     return streak;
 }
 
+export function getAllDatesWithCounts() {
+    const result = new Map();
+    for (const dates of completions.values()) {
+        for (const date of dates) {
+            result.set(date, (result.get(date) ?? 0) + 1);
+        }
+    }
+    return result;
+}
+
+export function getGlobalStreak() {
+    const dateCounts = getAllDatesWithCounts();
+    if (dateCounts.size === 0) return 0;
+
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+
+    function dateStr(dt) {
+        return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+    }
+
+    // If nothing done today, start from yesterday
+    if (!dateCounts.has(dateStr(d))) {
+        d.setDate(d.getDate() - 1);
+        if (!dateCounts.has(dateStr(d))) return 0;
+    }
+
+    let streak = 0;
+    while (dateCounts.has(dateStr(d))) {
+        streak++;
+        d.setDate(d.getDate() - 1);
+    }
+    return streak;
+}
+
 export async function toggleCompletion(habitId) {
     const today = localDateStr();
     if (!completions.has(habitId)) completions.set(habitId, new Set());
