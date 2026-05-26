@@ -11,7 +11,7 @@
   <script>
     try {
       if (Object.keys(localStorage).some(k => k.startsWith('sb-') && k.endsWith('-auth-token')))
-        window.location.replace('/');
+        window.location.replace('/app');
     } catch(e) {}
   </script>
 </head>

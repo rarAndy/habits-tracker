@@ -3,6 +3,12 @@ import { checkUsernameAvailable } from './state.js';
 
 let authTab = "signin";
 
+// ─── Pre-select tab from query param ─────────────────────────────────────────
+
+if (new URLSearchParams(window.location.search).get('tab') === 'signup') {
+    authTab = "signup";
+}
+
 // ─── Detect email confirmation redirect ──────────────────────────────────────
 
 const wasEmailConfirm = (() => {
@@ -97,7 +103,7 @@ onAuthStateChange(async (session) => {
         setAuthStatus("Authentication successful, logging in…");
         await new Promise(r => setTimeout(r, 1500));
     }
-    window.location.replace('/');
+    window.location.replace('/app');
 });
 
 // ─── Event listeners ──────────────────────────────────────────────────────────

@@ -19,7 +19,7 @@ import { signOut, onAuthStateChange } from './auth.js';
 
 async function handleSignOut() {
     try { await signOut(); } catch (err) { console.error("Sign out failed:", err); }
-    window.location.replace('/login');
+    window.location.replace('/');
 }
 
 async function onSession(session) {

@@ -3,103 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Habit Tracker</title>
+  <title>Habit Tracker — Build habits that stick</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <script>
     try {
-      if (!Object.keys(localStorage).some(k => k.startsWith('sb-') && k.endsWith('-auth-token')))
-        window.location.replace('/login');
+      if (Object.keys(localStorage).some(k => k.startsWith('sb-') && k.endsWith('-auth-token')))
+        window.location.replace('/app');
     } catch(e) {}
   </script>
 </head>
-<body>
+<body class="landing">
 
-  <header class="page-header">
-    <a href="/" class="logo">
+  <!-- ── Header ─────────────────────────────────────────────────────────────── -->
+  <header class="landing-header">
+    <div class="landing-logo">
       Habit Tracker
       <span>atomic habits system</span>
-    </a>
-    <div class="profile-wrap">
-      <button id="profile-btn" class="profile-btn" type="button" onclick="toggleProfileMenu(event)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="8" r="4"/>
-          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-        </svg>
-      </button>
-      <div id="profile-menu" class="profile-menu">
-        <a href="profile.html" class="profile-menu-item">Edit Profile</a>
-        <button class="profile-menu-item profile-menu-danger" type="button" onclick="handleSignOut()">Sign Out</button>
-      </div>
     </div>
+    <nav class="landing-nav">
+      <a href="/login" class="landing-nav-signin">Sign In</a>
+      <a href="/login?tab=signup" class="btn-primary landing-nav-signup">Get Started</a>
+    </nav>
   </header>
 
-  <nav class="toolbar" aria-label="Main controls">
-    <div class="toolbar-inner">
-      <div class="toolbar-section">
-        <span class="toolbar-label">Mode</span>
-        <div class="toolbar-group">
-          <button id="mode-edit-btn" class="mode-btn" type="button" onclick="setAppMode('edit')">Edit</button>
-          <button id="mode-view-btn" class="mode-btn" type="button" onclick="setAppMode('view')">View</button>
-        </div>
-      </div>
-
-      <div class="toolbar-sep"></div>
-
-      <div class="toolbar-section">
-        <span class="toolbar-label">Sort by</span>
-        <div class="toolbar-group">
-          <button class="toolbar-btn" type="button" onclick="sortAllByPriority()">Priority</button>
-          <button class="toolbar-btn" type="button" onclick="sortAllByType('positive')">Positive</button>
-          <button class="toolbar-btn" type="button" onclick="sortAllByType('negative')">Negative</button>
-        </div>
-      </div>
-
-      <div class="toolbar-sep"></div>
-
-      <div class="toolbar-section">
-        <span class="toolbar-label">Template</span>
-        <div class="toolbar-group">
-          <button class="toolbar-btn toolbar-btn-danger" type="button" onclick="applyTemplate()">Load Example</button>
-        </div>
-      </div>
-
-      <div class="toolbar-sep"></div>
-
-      <div class="toolbar-section">
-        <span class="toolbar-label">Data</span>
-        <div class="toolbar-group">
-          <div class="toolbar-dropdown">
-            <button class="toolbar-btn toolbar-btn-caret" type="button" onclick="toggleExportMenu(event)">
-              Export <span class="btn-caret">&#9660;</span>
-            </button>
-            <div class="toolbar-dropdown-menu" id="export-menu">
-              <button type="button" onclick="exportJSON(); closeExportMenu()">JSON</button>
-              <button type="button" onclick="exportCSV(); closeExportMenu()">CSV</button>
-            </div>
-          </div>
-          <button class="toolbar-btn" type="button" onclick="triggerImport()">Import</button>
-        </div>
-        <input type="file" id="import-input" accept=".json,.csv" style="display:none" onchange="handleImport(event)" />
-      </div>
+  <!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+  <section class="landing-hero">
+    <p class="landing-eyebrow">Built on Atomic Habits</p>
+    <h1 class="landing-headline">
+      Small habits.<br>
+      <em>Big change.</em>
+    </h1>
+    <p class="landing-sub">
+      A focused, distraction-free habit tracker that uses the science of
+      cue, craving, response, and reward to help habits actually stick.
+    </p>
+    <div class="landing-cta">
+      <a href="/login?tab=signup" class="btn-primary landing-cta-primary">Start for free</a>
+      <a href="/login" class="landing-cta-secondary">Sign in</a>
     </div>
-  </nav>
+  </section>
 
-  <main class="main">
-    <div class="add-bar">
-      <input
-        id="new-cat"
-        type="text"
-        placeholder="New category name (e.g. Productivity, Morning routine...)"
-      />
-      <button id="add-cat-btn" class="btn-primary" type="button">+ Add Category</button>
+  <!-- ── Features ───────────────────────────────────────────────────────────── -->
+  <section class="landing-features">
+    <div class="landing-feature">
+      <div class="landing-feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      </div>
+      <h3>Habit loop framework</h3>
+      <p>Every habit maps to a cue, craving, response, and reward — so you understand the why, not just the what.</p>
     </div>
+    <div class="landing-feature">
+      <div class="landing-feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <h3>Micro-habits</h3>
+      <p>Break each habit into small, rated steps. Make progress feel achievable — one tiny action at a time.</p>
+    </div>
+    <div class="landing-feature">
+      <div class="landing-feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <h3>Prioritize what matters</h3>
+      <p>Label habits as high, medium, or low priority. Sort and focus so your energy goes where it counts.</p>
+    </div>
+  </section>
 
-    <div id="app"></div>
-  </main>
+  <!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+  <footer class="landing-footer">
+    <span>Habit Tracker &mdash; atomic habits system</span>
+  </footer>
 
-  <script type="module" src="js/app.js"></script>
 </body>
 </html>
