@@ -308,15 +308,14 @@ body.login-page {
 }
 
 .landing-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-family: 'DM Serif Display', serif;
   font-size: 20px;
   color: var(--accent);
-  letter-spacing: -0.3px;
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
+  text-decoration: none;
 }
-.landing-logo span { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 300; color: var(--text3); letter-spacing: 0; }
 
 .landing-nav { display: flex; align-items: center; gap: 0.75rem; }
 .landing-nav-signin {
@@ -430,21 +429,19 @@ body.login-page {
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-family: 'DM Serif Display', serif;
-  font-size: 22px;
+  font-size: 20px;
   color: var(--accent);
-  letter-spacing: -0.3px;
   text-decoration: none;
 }
 
-.logo span {
-  color: var(--text3);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 300;
-  margin-left: 10px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+.logo-mark {
+  width: 36px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .main {
