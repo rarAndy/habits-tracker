@@ -32,5 +32,8 @@ export async function signOut() {
 }
 
 export function onAuthStateChange(callback) {
-    supabase.auth.onAuthStateChange((_event, session) => callback(session));
+    supabase.auth.onAuthStateChange((event, session) => {
+        console.log('[auth event]', event, session?.user?.email ?? 'no session');
+        callback(session);
+    });
 }
