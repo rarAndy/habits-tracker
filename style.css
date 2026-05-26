@@ -1356,6 +1356,11 @@ body.lab {
   --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --serif: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
+  /* semantic interaction tokens */
+  --item-hover:  rgba(255,255,255,0.055);
+  --item-active: rgba(255,255,255,0.085);
+  --row-hover:   rgba(255,255,255,0.025);
+  --row-sep:     rgba(255,255,255,0.05);
 
   font-family: var(--sans);
   color: var(--text);
@@ -1374,7 +1379,7 @@ body.lab *, body.lab *::before, body.lab *::after { box-sizing: border-box; }
 /* ── Sidebar ──────────────────────────────────────────────── */
 .sb {
   width: 240px; flex-shrink: 0;
-  background: #191919;
+  background: var(--paper);
   display: flex; flex-direction: column;
   padding: 4px 6px 8px;
   overflow-y: auto;
@@ -1494,7 +1499,7 @@ body.lab *, body.lab *::before, body.lab *::after { box-sizing: border-box; }
   height: 44px; padding: 0 16px;
   display: flex; align-items: center; gap: 6px;
   border-bottom: 1px solid rgba(255,255,255,0.07);
-  background: #191919;
+  background: var(--paper);
   flex-shrink: 0;
 }
 
@@ -1521,7 +1526,7 @@ body.lab *, body.lab *::before, body.lab *::after { box-sizing: border-box; }
   color: rgba(255,255,255,0.5) !important;
 }
 
-.sb-content { flex: 1; overflow: auto; background: #191919; }
+.sb-content { flex: 1; overflow: auto; background: var(--bg); }
 
 /* ── Shared primitives ────────────────────────────────────── */
 body.lab .eyebrow {
@@ -1905,3 +1910,233 @@ body.lab .toolbar-dropdown-menu button {
   color: rgba(255,255,255,0.7); font-family: var(--sans);
 }
 body.lab .toolbar-dropdown-menu button:hover { background: rgba(255,255,255,0.06); }
+
+/* ═══════════════════════════════════════════════════════════
+   Light theme — applied when body.lab.light
+   ═══════════════════════════════════════════════════════════ */
+
+body.lab.light {
+  --bg:         #f5f2ed;
+  --paper:      #faf7f1;
+  --surface:    #ffffff;
+  --surface2:   #f0ece5;
+  --toolbar:    #ebe4d8;
+  --border:     #ddd8cf;
+  --border2:    #c8c0b4;
+  --rule:       #eae3d6;
+  --text:       #1a1714;
+  --text2:      #6b6560;
+  --text3:      #9e9892;
+  --accent:     #2d5a27;
+  --accent-d:   #214019;
+  --accent-lt:  #e8f0e7;
+  --accent-bd:  #c0d9be;
+  --danger:     #8b2020;
+  --danger-lt:  #fbeaea;
+  --warn:       #7a4f10;
+  --warn-lt:    #fdf3e3;
+  --p-low:      #9e9892;
+  --p-med:      #b07d2a;
+  --p-high:     #8b2020;
+  --shadow:     0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03);
+  --shadow-pop: 0 1px 2px rgba(0,0,0,0.06);
+  --r-sm: 6px;  --r-md: 10px;  --r-lg: 14px;
+  --sans:  'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --item-hover:  rgba(0,0,0,0.04);
+  --item-active: rgba(0,0,0,0.07);
+  --row-hover:   rgba(0,0,0,0.02);
+  --row-sep:     rgba(0,0,0,0.05);
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ── Sidebar ── */
+body.lab.light .sb-brand .logo { color: var(--accent); }
+body.lab.light .sb-brand .logo:hover { background: var(--item-hover); color: var(--text); }
+body.lab.light .sb-section-head .eyebrow { color: var(--text3); }
+body.lab.light .sb-add { color: var(--text3); }
+body.lab.light .sb-add:hover { background: var(--item-hover); color: var(--text); }
+body.lab.light .sb-item,
+body.lab.light .sb-cat { color: var(--text2); }
+body.lab.light .sb-item.on,
+body.lab.light .sb-cat.on { background: var(--surface2); color: var(--text); }
+body.lab.light .sb-item:hover,
+body.lab.light .sb-cat:hover { background: var(--item-hover); color: var(--text); }
+body.lab.light .sb-item svg { opacity: 0.6; }
+body.lab.light .sb-item.on svg,
+body.lab.light .sb-item:hover svg { opacity: 1; }
+body.lab.light .sb-cat-dot { background: var(--border2); }
+body.lab.light .sb-cat.on .sb-cat-dot { background: var(--accent); }
+body.lab.light .sb-cat-n { color: var(--text3); }
+body.lab.light .sb-foot { border-top-color: var(--rule); }
+body.lab.light .sb-foot:hover { background: var(--surface2); }
+body.lab.light .profile-wrap-sb .profile-menu { background: var(--surface); border-color: var(--border); }
+body.lab.light .profile-wrap-sb .profile-menu .profile-menu-item { color: var(--text); }
+body.lab.light .profile-wrap-sb .profile-menu .profile-menu-item:hover { background: var(--surface2); }
+body.lab.light .profile-wrap-sb .profile-menu .profile-menu-danger { border-top-color: var(--border); }
+
+/* ── Topbar ── */
+body.lab.light .sb-topbar { border-bottom-color: var(--border); }
+body.lab.light .sb-crumb-sep { color: var(--text3); }
+body.lab.light .sb-crumb.active { color: var(--text); }
+body.lab.light .sb-crumb.dim { color: var(--text3); }
+body.lab.light .sb-search-trigger {
+  background: var(--surface2) !important;
+  border-color: var(--border) !important;
+  color: var(--text3) !important;
+}
+body.lab.light .sb-search-trigger:hover {
+  background: var(--paper) !important;
+  color: var(--text2) !important;
+}
+
+/* ── Shared primitives ── */
+body.lab.light .eyebrow { color: var(--accent); letter-spacing: 0.6px; }
+body.lab.light .small { color: var(--text2); }
+body.lab.light .meta { color: var(--text3); }
+body.lab.light .serif { font-family: var(--serif); }
+
+body.lab.light .btn {
+  border-color: var(--border2);
+  background: var(--surface);
+  color: var(--text2);
+}
+body.lab.light .btn:hover { background: var(--surface2); color: var(--text); }
+body.lab.light .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+body.lab.light .btn.primary:hover { background: var(--accent-d); border-color: var(--accent-d); }
+body.lab.light .btn.ghost { border-color: transparent; background: transparent; color: var(--text2); }
+body.lab.light .btn.ghost:hover { background: var(--surface2); color: var(--text); }
+body.lab.light .kbd { background: var(--surface); color: var(--text2); border-color: var(--border2); }
+
+body.lab.light .seg { background: var(--surface2); border-color: var(--border); }
+body.lab.light .seg button { color: var(--text2); }
+body.lab.light .seg button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow-pop); }
+
+body.lab.light .chip { background: var(--surface2); color: var(--text2); border-color: var(--border); }
+body.lab.light .chip.pos { background: var(--accent-lt); color: var(--accent); border-color: var(--accent-bd); }
+body.lab.light .chip.neg { background: var(--danger-lt); color: var(--danger); border-color: #e8c4c4; }
+body.lab.light .chip.high { background: var(--danger-lt); color: var(--danger); border-color: #e8c4c4; }
+body.lab.light .chip.med { background: var(--warn-lt); color: var(--warn); border-color: #ecd9b3; }
+body.lab.light .chip.low { background: var(--surface2); color: var(--text3); border-color: var(--border); }
+body.lab.light .chip.dot::before { background: currentColor; }
+
+body.lab.light .add-dashed { border-color: var(--border2); color: var(--text3); }
+body.lab.light .add-dashed:hover { background: var(--accent-lt); color: var(--accent); border-color: var(--accent-bd); }
+
+body.lab.light .m-check { border-color: var(--border2); }
+body.lab.light .m-check:hover { border-color: var(--accent); }
+body.lab.light .m-check.done { background: var(--accent); border-color: var(--accent); }
+
+/* ── Today view ── */
+body.lab.light .ss-stat { background: var(--surface); border-color: var(--border); }
+body.lab.light .ss-stat-num span { color: var(--text3); }
+body.lab.light .ss-bar { background: var(--border); }
+
+/* ── Habit rows ── */
+body.lab.light .ss-hcard { border-bottom-color: var(--rule); }
+body.lab.light .ss-hcard:first-child { border-top-color: var(--rule); }
+body.lab.light .ss-hcard:hover { background: var(--surface2); border-radius: 6px; }
+body.lab.light .ss-grip { color: var(--text3); }
+body.lab.light .ss-icon-btn { color: var(--text3); }
+body.lab.light .ss-icon-btn:hover { background: var(--surface2); color: var(--text); }
+body.lab.light .ss-orb { border-color: var(--border2); color: var(--text3); }
+body.lab.light .ss-orb.done { background: var(--accent); border-color: var(--accent); color: #fff; }
+body.lab.light .ss-line { background: var(--border); }
+body.lab.light .ss-line.done { background: var(--accent); }
+
+/* ── Category headers ── */
+body.lab.light .ss-cat-block-name { color: var(--text2); }
+body.lab.light .ss-cat-block-count { color: var(--text3); }
+body.lab.light .ss-cat-toggle:hover { background: var(--item-hover); }
+body.lab.light .ss-habits-head { border-bottom-color: var(--border); }
+
+/* ── Tracker ── */
+body.lab.light .ss-card { background: var(--surface); border-color: var(--border); box-shadow: var(--shadow-card); }
+body.lab.light .ss-loop-row { border-top-color: var(--rule); }
+body.lab.light .heat.heat-0 { background: var(--surface2); border-color: var(--border); }
+body.lab.light .heat-frame { background: var(--surface2); }
+
+/* ── Edit mode — reset all dark overrides ── */
+body.lab.light .category-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  margin-bottom: 1.25rem;
+}
+body.lab.light .cat-header { border-bottom-color: var(--border); background: transparent; }
+body.lab.light .cat-toggle { color: var(--text); padding: 14px 18px; }
+body.lab.light .cat-toggle:hover { background: var(--surface2); }
+body.lab.light .cat-name {
+  font-family: var(--serif); font-size: 17px; font-weight: 400;
+  color: var(--text); text-transform: none; letter-spacing: 0;
+}
+body.lab.light .cat-count { color: var(--text3); }
+body.lab.light .cat-del { color: var(--text3); }
+body.lab.light .cat-del:hover { color: var(--danger); }
+body.lab.light .cat-body { padding: 16px; }
+
+body.lab.light .habit-card {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: 10px;
+}
+body.lab.light .habit-header { background: var(--surface2); padding: 11px 14px; }
+body.lab.light .habit-header:hover { background: var(--bg); }
+body.lab.light .habit-name { font-size: 14px; font-weight: 500; color: var(--text); }
+body.lab.light .habit-body { border-top-color: var(--border); padding: 16px; }
+
+body.lab.light .field-label { color: var(--text2); }
+body.lab.light .field-label input,
+body.lab.light .field-label select {
+  background: var(--surface);
+  border-color: var(--border2);
+  color: var(--text);
+}
+body.lab.light .field-label input:focus,
+body.lab.light .field-label select:focus { border-color: var(--accent); }
+
+body.lab.light .badge-pos { background: var(--accent-lt); color: var(--accent); }
+body.lab.light .badge-neg { background: var(--danger-lt); color: var(--danger); }
+body.lab.light .priority-pill-high   { background: var(--danger-lt);  color: var(--danger); }
+body.lab.light .priority-pill-medium { background: var(--warn-lt);    color: var(--warn); }
+body.lab.light .priority-pill-low    { background: var(--surface2);   color: var(--text3); }
+body.lab.light .chevron { color: var(--text3); }
+
+body.lab.light .micro-table th { background: var(--surface2); border-color: var(--border); color: var(--text2); }
+body.lab.light .micro-table td { border-color: var(--border); }
+body.lab.light .micro-input { color: var(--text); }
+body.lab.light .micro-input:focus { background: var(--surface2); }
+body.lab.light .rating-select { color: var(--text); background: transparent; }
+body.lab.light .rating-select:focus { background: var(--surface2); }
+body.lab.light .view-field-label { color: var(--text3); }
+body.lab.light .view-field-value { color: var(--text); }
+body.lab.light .empty-row { color: var(--text3); }
+body.lab.light .section-label { color: var(--text3); }
+
+body.lab.light .add-micro-btn { border-color: var(--border2); color: var(--text2); }
+body.lab.light .add-micro-btn:hover { background: var(--surface2); color: var(--text); }
+
+body.lab.light .add-bar input { background: var(--surface); border-color: var(--border2); color: var(--text); }
+body.lab.light .add-bar input::placeholder { color: var(--text3); }
+body.lab.light .add-bar input:focus { border-color: var(--accent); }
+
+body.lab.light .btn-primary { background: var(--accent); border-color: var(--accent); }
+body.lab.light .btn-primary:hover { opacity: 0.88; }
+
+body.lab.light .add-habit-btn {
+  border-color: var(--border2); color: var(--text2);
+  background: none; border-radius: var(--r-md); margin-top: 6px;
+}
+body.lab.light .add-habit-btn:hover { background: var(--accent-lt); color: var(--accent); border-color: var(--accent); }
+
+body.lab.light .drag-handle { color: var(--text3); }
+body.lab.light .empty-msg { color: var(--text3); }
+body.lab.light .empty-state p:first-child { color: var(--text2); font-family: var(--serif); }
+
+body.lab.light .toolbar-dropdown-menu { background: var(--surface); border-color: var(--border2); }
+body.lab.light .toolbar-dropdown-menu button { color: var(--text); }
+body.lab.light .toolbar-dropdown-menu button:hover { background: var(--surface2); }

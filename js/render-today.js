@@ -21,7 +21,7 @@ function renderTodayHabit(h) {
     <article class="ss-hcard" id="habit-${h.id}">
       <div class="ss-hcard-head">
         <div class="ss-hcard-title">
-          <span style="font-size:14px;color:rgba(255,255,255,0.82);flex:1;min-width:0;${done ? 'opacity:0.35;text-decoration:line-through' : ''}">${esc(h.name)}</span>
+          <span style="font-size:14px;color:var(--text);flex:1;min-width:0;${done ? 'opacity:0.35;text-decoration:line-through' : ''}">${esc(h.name)}</span>
           <div class="ss-hcard-meta">
             ${typeChip}
             ${streak > 0 ? `<span class="meta">↻ ${streak}d</span>` : ''}
@@ -56,14 +56,14 @@ export function renderToday(username) {
 
     const emptyState = !total
         ? `<div style="padding:3rem 0">
-             <p style="color:rgba(255,255,255,0.3);font-size:14px;margin-bottom:12px">No habits yet.</p>
+             <p style="color:var(--text3);font-size:14px;margin-bottom:12px">No habits yet.</p>
              <button class="btn primary" onclick="setView('habits')">Go to Habits →</button>
            </div>`
         : '';
 
     const listHtml = habitsByCategory.map(({ cat, habits }) => `
       <div style="margin-bottom:28px">
-        <div style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.3);padding:4px 4px 8px">${esc(cat.name)}</div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);padding:4px 4px 8px">${esc(cat.name)}</div>
         <div class="ss-today-list">
           ${habits.map(renderTodayHabit).join('')}
         </div>
@@ -78,19 +78,19 @@ export function renderToday(username) {
     <div class="ss-today">
       <div class="ss-today-head">
         <div>
-          <div style="font-size:11px;font-weight:500;letter-spacing:0.04em;color:rgba(255,255,255,0.3);margin-bottom:8px;text-transform:none">${esc(dayName)}, ${esc(monthDay)}</div>
-          <h1 style="font-size:28px;font-weight:500;margin:0 0 6px;line-height:1.15;color:rgba(255,255,255,0.87)">
+          <div style="font-size:11px;font-weight:500;letter-spacing:0.04em;color:var(--text3);margin-bottom:8px;text-transform:none">${esc(dayName)}, ${esc(monthDay)}</div>
+          <h1 style="font-size:28px;font-weight:500;margin:0 0 6px;line-height:1.15;color:var(--text)">
             Good ${getTimeOfDay()}, ${name}.
           </h1>
-          <p style="font-size:14px;color:rgba(255,255,255,0.4);margin:0">${subtitle}</p>
+          <p style="font-size:14px;color:var(--text2);margin:0">${subtitle}</p>
         </div>
         <div class="ss-today-stats">
           <div class="ss-stat">
-            <div style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.3)">Streak</div>
+            <div style="font-size:11px;font-weight:500;color:var(--text3)">Streak</div>
             <div class="ss-stat-num">${maxStreak}<span>days</span></div>
           </div>
           <div class="ss-stat">
-            <div style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.3)">Today</div>
+            <div style="font-size:11px;font-weight:500;color:var(--text3)">Today</div>
             <div class="ss-stat-num">${done}<span>/ ${total}</span></div>
             <div class="ss-bar"><div style="width:${pct}%"></div></div>
           </div>

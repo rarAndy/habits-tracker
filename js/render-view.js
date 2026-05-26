@@ -41,7 +41,7 @@ function renderHabitCard(c, h) {
       <div class="ss-hcard-head">
         <span class="ss-grip" title="Drag to reorder">⠿</span>
         <div class="ss-hcard-title">
-          <span style="font-size:14px;color:rgba(255,255,255,0.82);cursor:pointer;flex:1;min-width:0;${done ? 'opacity:0.4;text-decoration:line-through' : ''}"
+          <span style="font-size:14px;color:var(--text);cursor:pointer;flex:1;min-width:0;${done ? 'opacity:0.4;text-decoration:line-through' : ''}"
             onclick="toggleHabit('${c.id}','${h.id}')">${esc(h.name)}</span>
           <div class="ss-hcard-meta">
             ${typeChip}
