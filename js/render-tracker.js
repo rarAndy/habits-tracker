@@ -115,11 +115,11 @@ export function renderTracker() {
     return `
     <div class="ss-tracker">
       <div class="ss-tracker-head">
-        <span class="eyebrow accent">Tracker</span>
-        <h1 class="serif" style="font-size:32px;font-weight:400;margin:6px 0 4px">
+        <div style="font-size:11px;font-weight:500;letter-spacing:0.04em;color:rgba(255,255,255,0.3);margin-bottom:8px">Tracker</div>
+        <h1 style="font-size:28px;font-weight:500;margin:0 0 6px;line-height:1.15;color:rgba(255,255,255,0.87)">
           ${totalCompletions > 0 ? `${totalCompletions} completions logged.` : 'No completions yet.'}
         </h1>
-        <p class="small">${globalStreak > 0 ? `${globalStreak}-day current streak · ` : ''}${totalHabits} habit${totalHabits !== 1 ? 's' : ''} tracked.</p>
+        <p style="font-size:14px;color:rgba(255,255,255,0.4);margin:0">${globalStreak > 0 ? `${globalStreak}-day streak · ` : ''}${totalHabits} habit${totalHabits !== 1 ? 's' : ''} tracked.</p>
       </div>
 
       <div class="ss-card" style="padding:22px">

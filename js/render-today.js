@@ -21,10 +21,10 @@ function renderTodayHabit(h) {
     <article class="ss-hcard" id="habit-${h.id}">
       <div class="ss-hcard-head">
         <div class="ss-hcard-title">
-          <h3 class="serif" style="font-size:18px;font-weight:400;margin:0;line-height:1.2;${done ? 'color:var(--text3);text-decoration:line-through;text-decoration-color:var(--border2)' : ''}">${esc(h.name)}</h3>
+          <span style="font-size:14px;color:rgba(255,255,255,0.82);flex:1;min-width:0;${done ? 'opacity:0.35;text-decoration:line-through' : ''}">${esc(h.name)}</span>
           <div class="ss-hcard-meta">
             ${typeChip}
-            ${streak > 0 ? `<span class="meta">↻ ${streak}-day streak</span>` : ''}
+            ${streak > 0 ? `<span class="meta">↻ ${streak}d</span>` : ''}
           </div>
         </div>
         <div class="ss-hcard-actions">
@@ -55,15 +55,15 @@ export function renderToday(username) {
         .map(c => ({ cat: c, habits: c.habits }));
 
     const emptyState = !total
-        ? `<div class="empty-state" style="padding:3rem 1rem">
-             <p>No habits yet.</p>
-             <p><button class="btn primary" onclick="setView('habits')">Go to Habits →</button></p>
+        ? `<div style="padding:3rem 0">
+             <p style="color:rgba(255,255,255,0.3);font-size:14px;margin-bottom:12px">No habits yet.</p>
+             <button class="btn primary" onclick="setView('habits')">Go to Habits →</button>
            </div>`
         : '';
 
     const listHtml = habitsByCategory.map(({ cat, habits }) => `
-      <div style="margin-bottom:24px">
-        <div class="eyebrow accent" style="margin-bottom:10px">${esc(cat.name)}</div>
+      <div style="margin-bottom:28px">
+        <div style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.3);padding:4px 4px 8px">${esc(cat.name)}</div>
         <div class="ss-today-list">
           ${habits.map(renderTodayHabit).join('')}
         </div>
@@ -71,26 +71,26 @@ export function renderToday(username) {
 
     const remaining = total - done;
     const subtitle = total === 0 ? 'No habits yet — add some in Habits.'
-        : done === total ? 'All done for today. Well done.'
-        : `${remaining} habit${remaining !== 1 ? 's' : ''} left today.`;
+        : done === total ? 'All done for today.'
+        : `${remaining} left`;
 
     return `
     <div class="ss-today">
       <div class="ss-today-head">
         <div>
-          <span class="eyebrow accent">${esc(dayName)} · ${esc(monthDay)}</span>
-          <h1 class="serif" style="font-size:34px;font-weight:400;margin:6px 0 4px;line-height:1.05">
-            Good ${getTimeOfDay()}, <em>${name}.</em>
+          <div style="font-size:11px;font-weight:500;letter-spacing:0.04em;color:rgba(255,255,255,0.3);margin-bottom:8px;text-transform:none">${esc(dayName)}, ${esc(monthDay)}</div>
+          <h1 style="font-size:28px;font-weight:500;margin:0 0 6px;line-height:1.15;color:rgba(255,255,255,0.87)">
+            Good ${getTimeOfDay()}, ${name}.
           </h1>
-          <p class="small" style="margin:0">${subtitle}</p>
+          <p style="font-size:14px;color:rgba(255,255,255,0.4);margin:0">${subtitle}</p>
         </div>
         <div class="ss-today-stats">
           <div class="ss-stat">
-            <span class="eyebrow">Streak</span>
+            <div style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.3)">Streak</div>
             <div class="ss-stat-num">${maxStreak}<span>days</span></div>
           </div>
           <div class="ss-stat">
-            <span class="eyebrow">Today</span>
+            <div style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.3)">Today</div>
             <div class="ss-stat-num">${done}<span>/ ${total}</span></div>
             <div class="ss-bar"><div style="width:${pct}%"></div></div>
           </div>

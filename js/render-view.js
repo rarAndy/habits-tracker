@@ -18,18 +18,20 @@ function renderHabitCard(c, h) {
         ? `<span class="chip med dot">Medium</span>`
         : `<span class="chip low dot">Low</span>`;
     const streakMeta = streak > 0
-        ? `<span class="meta">↻ ${streak}-day streak</span>`
+        ? `<span class="meta" style="white-space:nowrap">↻ ${streak}d</span>`
         : '';
 
     const microCount = h.microhabits?.length ?? 0;
     const microStrip = microCount > 0 ? `
       <div class="ss-hcard-loop">
         ${h.microhabits.slice(0, 5).map((m, i) => `
-          <span class="ss-orb ${i < 2 ? 'done' : ''}" title="${esc(m.description || '')}">${i < 2 ? checkSvg.replace('viewBox','style="width:8px;height:8px" viewBox') : i + 1}</span>
+          <span class="ss-orb ${i < 2 ? 'done' : ''}" title="${esc(m.description || '')}">${i < 2 ? '✓' : i + 1}</span>
           ${i < Math.min(microCount, 5) - 1 ? `<span class="ss-line ${i < 1 ? 'done' : ''}"></span>` : ''}
         `).join('')}
-        <span class="meta" style="margin-left:10px">${microCount} microhabit${microCount !== 1 ? 's' : ''}</span>
+        <span class="meta" style="margin-left:10px">${microCount} micro</span>
       </div>` : '';
+
+    const hasBody = h.open !== false && (h.cue || h.craving || h.response || h.reward || microCount > 0);
 
     return `
     <article class="ss-hcard view-habit-card" id="habit-${h.id}"
@@ -39,8 +41,8 @@ function renderHabitCard(c, h) {
       <div class="ss-hcard-head">
         <span class="ss-grip" title="Drag to reorder">⠿</span>
         <div class="ss-hcard-title">
-          <h3 class="serif" style="font-size:18px;font-weight:400;margin:0;line-height:1.2;cursor:pointer"
-            onclick="toggleHabit('${c.id}','${h.id}')">${esc(h.name)}</h3>
+          <span style="font-size:14px;color:rgba(255,255,255,0.82);cursor:pointer;flex:1;min-width:0;${done ? 'opacity:0.4;text-decoration:line-through' : ''}"
+            onclick="toggleHabit('${c.id}','${h.id}')">${esc(h.name)}</span>
           <div class="ss-hcard-meta">
             ${typeChip}
             ${priorityChip}
@@ -55,7 +57,7 @@ function renderHabitCard(c, h) {
           </button>
         </div>
       </div>
-      ${h.open !== false ? renderHabitBody(h) : ''}
+      ${hasBody ? renderHabitBody(h) : ''}
       ${microStrip}
     </article>`;
 }
