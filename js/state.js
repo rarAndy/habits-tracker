@@ -5,28 +5,57 @@ const STORAGE_KEY    = "habit-tracker-v1";
 const MODE_KEY       = "habit-tracker-mode";
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 
-export let state        = [];
-export let appMode      = "edit";
-export let currentEmail = null;
-let currentUserId       = null;
+export let state           = [];
+export let appMode         = "edit";
+export let currentEmail    = null;
+export let currentUsername = null;
+let currentUserId          = null;
 
 export function setCurrentUser(userId, email) {
     currentUserId  = userId;
     currentEmail   = email;
+    currentUsername = null;
 }
 
 // ─── Persistence ─────────────────────────────────────────────────────────────
 
 export async function loadState() {
     if (!currentUserId) { state = []; return; }
-    const { data, error } = await supabase
-        .from('habits_data')
-        .select('data')
-        .eq('user_id', currentUserId)
+
+    const [habitsRes, profileRes] = await Promise.all([
+        supabase.from('habits_data').select('data').eq('user_id', currentUserId).maybeSingle(),
+        supabase.from('profiles').select('username').eq('user_id', currentUserId).maybeSingle(),
+    ]);
+
+    if (habitsRes.error)  throw habitsRes.error;
+    if (profileRes.error) throw profileRes.error;
+
+    state = habitsRes.data?.data ?? [];
+    if (habitsRes.data === null) saveState();
+
+    if (profileRes.data === null) {
+        // First login after sign-up — create profile from user_metadata
+        const { data: userData } = await supabase.auth.getUser();
+        const username = userData?.user?.user_metadata?.username;
+        if (username) {
+            const { error } = await supabase
+                .from('profiles')
+                .insert({ user_id: currentUserId, username, email: currentEmail });
+            if (error) throw error;
+            currentUsername = username;
+        }
+    } else {
+        currentUsername = profileRes.data.username;
+    }
+}
+
+export async function checkUsernameAvailable(username) {
+    const { data } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
         .maybeSingle();
-    if (error) throw error;
-    state = data?.data ?? [];
-    if (data === null) saveState(); // create row for new user immediately
+    return data === null;
 }
 
 export function saveState() {

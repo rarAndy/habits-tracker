@@ -1,6 +1,6 @@
 import {
-    state, appMode, currentEmail,
-    loadState, loadMode, persistMode, setCurrentUser,
+    state, appMode, currentUsername,
+    loadState, loadMode, persistMode, setCurrentUser, checkUsernameAvailable,
     addCategory, deleteCategory, toggleCategory,
     addHabit, deleteHabit, toggleHabit, updateHabit,
     addMicrohabit, deleteMicrohabit, updateMicrohabit,
@@ -33,8 +33,8 @@ function showAuth() {
 function hideAuth() {
     document.getElementById("auth-overlay")?.classList.add("hidden");
     document.getElementById("app-shell")?.classList.remove("hidden");
-    const emailEl = document.getElementById("user-email");
-    if (emailEl) emailEl.textContent = currentEmail ?? "";
+    const profileBtn = document.getElementById("profile-btn");
+    if (profileBtn) profileBtn.title = currentUsername ?? "Profile";
 }
 
 function setAuthStatus(msg) {
@@ -65,6 +65,7 @@ function authSetTab(tab) {
     );
     const btn = document.getElementById("auth-submit-btn");
     if (btn) btn.textContent = tab === "signin" ? "Sign In" : "Sign Up";
+    document.getElementById("auth-username-wrap")?.classList.toggle("hidden", tab !== "signup");
     setAuthError("");
 }
 
@@ -80,17 +81,27 @@ async function authSubmit(e) {
         if (authTab === "signin") {
             await signIn(email, password);
         } else {
-            const session = await signUp(email, password);
+            const username = document.getElementById("auth-username")?.value.trim() ?? "";
+            if (username.length < 3 || username.length > 30) {
+                setAuthError("Username must be 3–30 characters.");
+                resetAuthBtn();
+                return;
+            }
+            const available = await checkUsernameAvailable(username);
+            if (!available) {
+                setAuthError("Username already taken.");
+                resetAuthBtn();
+                return;
+            }
+            const session = await signUp(email, password, username);
             if (!session) {
                 setAuthError("Check your email to confirm your account.");
-                btn.disabled    = false;
-                btn.textContent = "Sign Up";
+                resetAuthBtn();
             }
         }
     } catch (err) {
         setAuthError(err.message);
-        btn.disabled    = false;
-        btn.textContent = authTab === "signin" ? "Sign In" : "Sign Up";
+        resetAuthBtn();
     }
 }
 

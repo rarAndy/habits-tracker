@@ -30,6 +30,9 @@
       <form id="auth-form" class="auth-form">
         <input id="auth-email"    type="email"    placeholder="Email"    autocomplete="email"            required />
         <input id="auth-password" type="password" placeholder="Password" autocomplete="current-password" required />
+        <div id="auth-username-wrap" class="hidden">
+          <input id="auth-username" type="text" placeholder="Username (3–30 characters)" autocomplete="username" />
+        </div>
         <button id="auth-submit-btn" class="btn-primary auth-submit" type="submit">Sign In</button>
       </form>
 
@@ -50,7 +53,12 @@
         Habit Tracker
         <span>atomic habits system</span>
       </div>
-      <span id="user-email" class="user-email"></span>
+      <button id="profile-btn" class="profile-btn" type="button" title="Profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+      </button>
       <button class="sign-out-btn" type="button" onclick="handleSignOut()">Sign out</button>
     </header>
 
