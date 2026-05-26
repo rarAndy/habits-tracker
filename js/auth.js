@@ -5,7 +5,7 @@ export async function signUp(email, password, username) {
         email,
         password,
         options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: `${window.location.origin}/login`,
             data: { username },
         },
     });
@@ -24,7 +24,7 @@ export async function signIn(email, password) {
 export async function signInWithGoogle() {
     const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin },
+        options: { redirectTo: `${window.location.origin}/login` },
     });
     if (error) throw error;
 }

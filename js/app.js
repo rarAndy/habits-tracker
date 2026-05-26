@@ -1,6 +1,6 @@
 import {
     state, appMode, currentUsername,
-    loadState, loadMode, persistMode, setCurrentUser, checkUsernameAvailable,
+    loadState, loadMode, persistMode, setCurrentUser,
     addCategory, deleteCategory, toggleCategory,
     addHabit, deleteHabit, toggleHabit, updateHabit,
     addMicrohabit, deleteMicrohabit, updateMicrohabit,
@@ -13,133 +13,29 @@ import { renderCategoryEdit } from './render-edit.js';
 import { renderWithCatGaps } from './render-view.js';
 import { exportJSON, exportCSV, triggerImport, handleImport } from './io.js';
 import { applyTemplate } from './template.js';
-import { signIn, signUp, signInWithGoogle, signOut, onAuthStateChange } from './auth.js';
+import { signOut, onAuthStateChange } from './auth.js';
 
-// ─── Auth UI ──────────────────────────────────────────────────────────────────
-
-let authTab = "signin";
-
-function showAuth() {
-    delete document.documentElement.dataset.session;
-    document.getElementById("auth-overlay")?.classList.remove("hidden");
-    document.getElementById("app-shell")?.classList.add("hidden");
-    setAuthError("");
-    setAuthStatus("");
-    resetAuthBtn();
-    authSetTab("signin");
-    const pw = document.getElementById("auth-password");
-    if (pw) pw.value = "";
-}
-
-function hideAuth() {
-    document.getElementById("auth-overlay")?.classList.add("hidden");
-    document.getElementById("app-shell")?.classList.remove("hidden");
-    const profileBtn = document.getElementById("profile-btn");
-    if (profileBtn) profileBtn.title = currentUsername ?? "Profile";
-}
-
-function setAuthStatus(msg) {
-    const el = document.getElementById("auth-status");
-    if (!el) return;
-    el.textContent = msg;
-    el.classList.toggle("hidden", !msg);
-}
-
-function setAuthError(msg) {
-    const el = document.getElementById("auth-error");
-    if (!el) return;
-    el.textContent = msg;
-    el.classList.toggle("hidden", !msg);
-}
-
-function resetAuthBtn() {
-    const btn = document.getElementById("auth-submit-btn");
-    if (!btn) return;
-    btn.disabled    = false;
-    btn.textContent = authTab === "signin" ? "Sign In" : "Sign Up";
-}
-
-function authSetTab(tab) {
-    authTab = tab;
-    document.querySelectorAll(".auth-tab").forEach(t =>
-        t.classList.toggle("active", t.dataset.tab === tab)
-    );
-    const btn = document.getElementById("auth-submit-btn");
-    if (btn) btn.textContent = tab === "signin" ? "Sign In" : "Sign Up";
-    document.getElementById("auth-username-wrap")?.classList.toggle("hidden", tab !== "signup");
-    setAuthError("");
-}
-
-async function authSubmit(e) {
-    e.preventDefault();
-    setAuthError("");
-    const email    = document.getElementById("auth-email").value;
-    const password = document.getElementById("auth-password").value;
-    const btn      = document.getElementById("auth-submit-btn");
-    btn.disabled   = true;
-    btn.textContent = "…";
-    try {
-        if (authTab === "signin") {
-            await signIn(email, password);
-        } else {
-            const username = document.getElementById("auth-username")?.value.trim() ?? "";
-            if (username.length < 3 || username.length > 30) {
-                setAuthError("Username must be 3–30 characters.");
-                resetAuthBtn();
-                return;
-            }
-            const available = await checkUsernameAvailable(username);
-            if (!available) {
-                setAuthError("Username already taken.");
-                resetAuthBtn();
-                return;
-            }
-            const session = await signUp(email, password, username);
-            if (!session) {
-                setAuthError("Check your email to confirm your account.");
-                resetAuthBtn();
-            }
-        }
-    } catch (err) {
-        setAuthError(err.message);
-        resetAuthBtn();
-    }
-}
-
-async function authGoogle() {
-    setAuthError("");
-    try { await signInWithGoogle(); }
-    catch (err) { setAuthError(err.message); }
-}
+// ─── Auth ─────────────────────────────────────────────────────────────────────
 
 async function handleSignOut() {
-    try { await signOut(); }
-    catch (err) { console.error("Sign out failed:", err); }
+    try { await signOut(); } catch (err) { console.error("Sign out failed:", err); }
+    window.location.replace('/login');
 }
 
-// ─── Auth State ───────────────────────────────────────────────────────────────
-
 async function onSession(session) {
-    if (session) {
-        if (wasEmailConfirm) setAuthStatus("Authentication successful, logging in…");
-        setCurrentUser(session.user.id, session.user.email);
-        try {
-            await loadState();
-        } catch (err) {
-            console.error("loadState failed:", err);
-            setAuthError("Failed to load data: " + err.message);
-            setCurrentUser(null, null);
-            resetAuthBtn();
-            return;
-        }
-        loadMode();
-        render();
-        if (wasEmailConfirm) await new Promise(r => setTimeout(r, 1500));
-        hideAuth();
-    } else {
-        setCurrentUser(null, null);
-        showAuth();
+    if (!session) { window.location.replace('/login'); return; }
+    setCurrentUser(session.user.id, session.user.email);
+    try {
+        await loadState();
+    } catch (err) {
+        console.error("loadState failed:", err);
+        window.location.replace('/login');
+        return;
     }
+    loadMode();
+    render();
+    const profileBtn = document.getElementById("profile-btn");
+    if (profileBtn) profileBtn.title = currentUsername ?? "Profile";
 }
 
 // ─── Mode ─────────────────────────────────────────────────────────────────────
@@ -270,10 +166,6 @@ function submitCategoryInput() {
     render();
 }
 
-function handleCategoryInput(e) {
-    if (e.key === "Enter") submitCategoryInput();
-}
-
 function toggleExportMenu(e) {
     e.stopPropagation();
     document.getElementById("export-menu")?.classList.toggle("open");
@@ -294,12 +186,12 @@ function closeProfileMenu() {
 
 function attachUiHandlers() {
     document.getElementById("add-cat-btn")?.addEventListener("click", submitCategoryInput);
-    document.getElementById("new-cat")?.addEventListener("keydown", handleCategoryInput);
-    document.getElementById("auth-form")?.addEventListener("submit", authSubmit);
+    document.getElementById("new-cat")?.addEventListener("keydown", e => {
+        if (e.key === "Enter") submitCategoryInput();
+    });
     window.addEventListener("habit-import", () => { loadMode(); render(); });
     document.addEventListener("click", () => { closeExportMenu(); closeProfileMenu(); });
 
-    // Suppress the "forbidden" X cursor when dragging over non-gap areas.
     const appEl = document.getElementById("app");
     appEl?.addEventListener("dragover", e => {
         if (isCatDragging() || isHabitDragging()) e.preventDefault();
@@ -341,25 +233,11 @@ Object.assign(window, {
     exportCSV,
     triggerImport,
     handleImport,
-    authSetTab,
-    authGoogle,
     handleSignOut,
     toggleProfileMenu,
 });
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
-
-// Detect when the page was opened from a Supabase email confirmation link.
-const wasEmailConfirm = (() => {
-    const hash  = new URLSearchParams(window.location.hash.slice(1));
-    const query = new URLSearchParams(window.location.search);
-    return hash.get('type') === 'signup' || query.get('type') === 'signup';
-})();
-
-if (wasEmailConfirm) {
-    setAuthStatus("Confirming your account…");
-    window.history.replaceState({}, '', window.location.pathname);
-}
 
 attachUiHandlers();
 onAuthStateChange(onSession);
