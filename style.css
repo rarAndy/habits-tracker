@@ -393,15 +393,6 @@ body.login-page {
   margin: 0 auto;
 }
 
-.landing-eyebrow {
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 1.25rem;
-}
-
 .landing-headline {
   font-family: 'DM Serif Display', serif;
   font-size: clamp(2.6rem, 6vw, 4rem);
@@ -410,6 +401,23 @@ body.login-page {
   margin-bottom: 1.5rem;
 }
 .landing-headline em { color: var(--accent); font-style: italic; }
+
+.typewriter-wrap {
+  display: block;
+  color: var(--accent);
+  font-style: italic;
+  min-height: 1.2em;
+}
+
+.typewriter-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  animation: blink 0.65s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
 
 .landing-sub {
   font-size: 1.05rem;

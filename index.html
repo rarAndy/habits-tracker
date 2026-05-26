@@ -33,14 +33,15 @@
 
   <!-- ── Hero ───────────────────────────────────────────────────────────────── -->
   <section class="landing-hero">
-    <p class="landing-eyebrow">Built on Atomic Habits</p>
     <h1 class="landing-headline">
-      Small habits.<br>
-      <em>Big change.</em>
+      Build habits that are
+      <span class="typewriter-wrap">
+        <span id="typewriter-text" class="typewriter-text"></span><span class="typewriter-cursor">|</span>
+      </span>
     </h1>
     <p class="landing-sub">
-      A focused, distraction-free habit tracker that uses the science of
-      cue, craving, response, and reward to help habits actually stick.
+      A focused, distraction-free habit tracker that helps you understand,
+      build, and stick to the habits that actually matter.
     </p>
     <div class="landing-cta">
       <a href="/signup" class="btn-primary landing-cta-primary">Start for free</a>
@@ -54,8 +55,8 @@
       <div class="landing-feature-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
       </div>
-      <h3>Habit loop framework</h3>
-      <p>Every habit maps to a cue, craving, response, and reward — so you understand the why, not just the what.</p>
+      <h3>Build the full picture</h3>
+      <p>Log the trigger, motivation, action, and reward behind each habit — so you know exactly why it works.</p>
     </div>
     <div class="landing-feature">
       <div class="landing-feature-icon">
@@ -68,8 +69,8 @@
       <div class="landing-feature-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       </div>
-      <h3>Prioritize what matters</h3>
-      <p>Label habits as high, medium, or low priority. Sort and focus so your energy goes where it counts.</p>
+      <h3>Streaks &amp; check-ins</h3>
+      <p>Check off habits daily and watch your streak grow. A visible chain is one of the strongest motivators there is.</p>
     </div>
   </section>
 
@@ -77,6 +78,38 @@
   <footer class="landing-footer">
     <span>Loopabl &mdash; build habits that stick</span>
   </footer>
+
+  <script>
+    const words = ['small.', 'stackable.', 'loopable.'];
+    const el = document.getElementById('typewriter-text');
+    let wordIdx = 0, charIdx = 0, deleting = false;
+
+    function tick() {
+      const word = words[wordIdx];
+      if (!deleting) {
+        charIdx++;
+        el.textContent = word.slice(0, charIdx);
+        if (charIdx === word.length) {
+          deleting = true;
+          setTimeout(tick, 2000);
+          return;
+        }
+        setTimeout(tick, 90);
+      } else {
+        charIdx--;
+        el.textContent = word.slice(0, charIdx);
+        if (charIdx === 0) {
+          deleting = false;
+          wordIdx = (wordIdx + 1) % words.length;
+          setTimeout(tick, 350);
+          return;
+        }
+        setTimeout(tick, 45);
+      }
+    }
+
+    tick();
+  </script>
 
 </body>
 </html>
