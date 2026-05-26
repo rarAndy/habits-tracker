@@ -141,27 +141,23 @@ body.login-page {
 }
 
 
-.auth-tabs {
-  display: flex;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+.auth-heading {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.5rem;
+  color: var(--text);
 }
-.auth-tab {
-  flex: 1;
-  padding: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
+
+.auth-switch {
   font-size: 13px;
   color: var(--text2);
-  transition: background 0.15s, color 0.15s;
+  text-align: center;
 }
-.auth-tab.active {
-  background: var(--accent);
-  color: #fff;
+.auth-switch a {
+  color: var(--accent);
+  text-decoration: none;
   font-weight: 500;
 }
+.auth-switch a:hover { text-decoration: underline; }
 
 .auth-status {
   font-size: 13px;

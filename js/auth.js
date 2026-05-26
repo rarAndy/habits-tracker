@@ -5,7 +5,7 @@ export async function signUp(email, password, username) {
         email,
         password,
         options: {
-            emailRedirectTo: `${window.location.origin}/login`,
+            emailRedirectTo: `${window.location.origin}/signup`,
             data: { username },
         },
     });

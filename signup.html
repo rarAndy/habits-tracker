@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Loopable — Sign In</title>
+  <title>Loopable — Sign Up</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -30,22 +30,24 @@
         <svg class="login-brand-mark" viewBox="0 0 48 24" fill="none" aria-hidden="true">
           <path d="M24,12 C24,6 20,2 14,2 C8,2 4,6 4,12 C4,18 8,22 14,22 C20,22 24,18 24,12 C24,6 28,2 34,2 C40,2 44,6 44,12 C44,18 40,22 34,22 C28,22 24,18 24,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <h2 class="login-brand-headline">Welcome<br><em>back.</em></h2>
-        <p class="login-brand-sub">Pick up where you left off.</p>
+        <h2 class="login-brand-headline">Build habits<br><em>that loop.</em></h2>
+        <p class="login-brand-sub">A focused system for small habits that compound into big change.</p>
       </div>
     </div>
 
     <div class="login-right">
       <div class="auth-card">
 
-        <h2 class="auth-heading">Sign in</h2>
+        <h2 class="auth-heading">Create account</h2>
 
-        <p id="auth-error" class="auth-error hidden"></p>
+        <p id="auth-status" class="auth-status hidden"></p>
+        <p id="auth-error"  class="auth-error hidden"></p>
 
         <form id="auth-form" class="auth-form">
           <input id="auth-email"    type="email"    placeholder="Email"    autocomplete="email"            required />
-          <input id="auth-password" type="password" placeholder="Password" autocomplete="current-password" required />
-          <button id="auth-submit-btn" class="btn-primary auth-submit" type="submit">Sign In</button>
+          <input id="auth-password" type="password" placeholder="Password" autocomplete="new-password"     required />
+          <input id="auth-username" type="text"     placeholder="Username (3–30 characters)" autocomplete="username" required />
+          <button id="auth-submit-btn" class="btn-primary auth-submit" type="submit">Sign Up</button>
         </form>
 
         <div class="auth-divider"><span>or</span></div>
@@ -55,13 +57,13 @@
           Continue with Google
         </button>
 
-        <p class="auth-switch">Don't have an account? <a href="/signup">Sign up</a></p>
+        <p class="auth-switch">Already have an account? <a href="/login">Sign in</a></p>
 
       </div>
     </div>
 
   </div>
 
-  <script type="module" src="js/login.js"></script>
+  <script type="module" src="js/signup.js"></script>
 </body>
 </html>
