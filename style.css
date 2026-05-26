@@ -39,6 +39,10 @@ body {
 /* ── Utility ───────────────────────────────────────────── */
 .hidden { display: none !important; }
 
+/* Pre-hide auth overlay for returning users before JS loads */
+[data-session="1"] #auth-overlay { display: none !important; }
+[data-session="1"] #app-shell    { display: block !important; }
+
 /* ── Auth Overlay ──────────────────────────────────────── */
 .auth-overlay {
   position: fixed;

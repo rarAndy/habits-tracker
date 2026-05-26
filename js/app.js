@@ -20,6 +20,7 @@ import { signIn, signUp, signInWithGoogle, signOut, onAuthStateChange } from './
 let authTab = "signin";
 
 function showAuth() {
+    delete document.documentElement.dataset.session;
     document.getElementById("auth-overlay")?.classList.remove("hidden");
     document.getElementById("app-shell")?.classList.add("hidden");
     setAuthError("");
