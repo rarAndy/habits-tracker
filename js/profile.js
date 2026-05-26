@@ -2,6 +2,7 @@ import { supabase } from './supabase.js';
 import { onAuthStateChange } from './auth.js';
 
 let currentUserId = null;
+let currentEmail  = null;
 
 async function loadProfile(userId, email) {
     document.getElementById('profile-email').value = email ?? '';
@@ -29,8 +30,7 @@ async function handleSave(e) {
 
     const { error } = await supabase
         .from('profiles')
-        .update({ username })
-        .eq('user_id', currentUserId);
+        .upsert({ user_id: currentUserId, username, email: currentEmail }, { onConflict: 'user_id' });
 
     btn.disabled    = false;
     btn.textContent = 'Save Changes';
@@ -50,8 +50,9 @@ function showMsg(text, type) {
 }
 
 onAuthStateChange((session) => {
-    if (!session) { window.location.href = 'index.html'; return; }
+    if (!session) { window.location.replace('/'); return; }
     currentUserId = session.user.id;
+    currentEmail  = session.user.email;
     loadProfile(session.user.id, session.user.email);
 });
 
