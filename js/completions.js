@@ -1,12 +1,9 @@
 import { supabase } from './supabase.js';
+import { localDateStr } from './helpers.js';
 
 // Map<habitId, Set<"YYYY-MM-DD">>
 const completions = new Map();
 let currentUserId = null;
-
-function localDateStr(d = new Date()) {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 export async function loadCompletions(userId) {
     currentUserId = userId;
@@ -68,18 +65,13 @@ export function getGlobalStreak() {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
 
-    function dateStr(dt) {
-        return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
-    }
-
-    // If nothing done today, start from yesterday
-    if (!dateCounts.has(dateStr(d))) {
+    if (!dateCounts.has(localDateStr(d))) {
         d.setDate(d.getDate() - 1);
-        if (!dateCounts.has(dateStr(d))) return 0;
+        if (!dateCounts.has(localDateStr(d))) return 0;
     }
 
     let streak = 0;
-    while (dateCounts.has(dateStr(d))) {
+    while (dateCounts.has(localDateStr(d))) {
         streak++;
         d.setDate(d.getDate() - 1);
     }

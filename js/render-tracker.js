@@ -1,10 +1,6 @@
 import { state } from './state.js';
 import { getAllDatesWithCounts, getStreak, getGlobalStreak } from './completions.js';
-import { esc } from './helpers.js';
-
-function localDateStr(d) {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+import { esc, localDateStr } from './helpers.js';
 
 function buildHeatmapGrid(dateCounts, totalHabits, weeks = 18) {
     const grid = [];
@@ -91,12 +87,6 @@ export function renderTracker() {
         ? allHabits.slice(0, 8).map(h => {
             const streak = getStreak(h.id);
             const cat = state.find(c => c.habits.some(hh => hh.id === h.id));
-            // count completions in last 4 weeks
-            const fourWeeksAgo = new Date();
-            fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
-            let recentCount = 0;
-            const dateSet = getAllDatesWithCounts(); // approximation — just use global
-            // Actually we need per-habit data — use getStreak as a proxy
             const pct = Math.min(100, Math.round((streak / 14) * 100));
             return `
             <div class="ss-loop-row">

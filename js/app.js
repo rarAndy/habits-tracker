@@ -11,7 +11,7 @@ import {
 
 import { esc } from './helpers.js';
 import { renderCategoryEdit } from './render-edit.js';
-import { renderCategoryHabitsNew, renderWithCatGaps } from './render-view.js';
+import { renderCategoryHabitsNew } from './render-view.js';
 import { renderToday } from './render-today.js';
 import { renderTracker } from './render-tracker.js';
 import { loadCompletions, toggleCompletion, getGlobalStreak } from './completions.js';
@@ -24,52 +24,47 @@ import { signOut, onAuthStateChange } from './auth.js';
 const THEME_KEY = 'loopabl-theme';
 const SIDEBAR_KEY = 'loopabl-sidebar';
 
+const SIDEBAR_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>`;
+
+const ICON_SUN  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+const ICON_MOON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+const ICON_STAR = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`;
+const ICON_LIST = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`;
+const ICON_CAL  = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+
+const THEME_META = {
+    light:      { icon: ICON_SUN,  title: 'Light — click for Catppuccin' },
+    catppuccin: { icon: ICON_STAR, title: 'Catppuccin — click for dark' },
+    dark:       { icon: ICON_MOON, title: 'Dark — click for light' },
+};
+
+function getTheme() {
+    const cl = document.body.classList;
+    if (cl.contains('light')) return 'light';
+    if (cl.contains('catppuccin')) return 'catppuccin';
+    return 'dark';
+}
+
 function toggleSidebar() {
     const isClosed = document.body.classList.toggle('sidebar-closed');
     localStorage.setItem(SIDEBAR_KEY, isClosed ? 'closed' : 'open');
-    renderTopbar();
 }
 
-function loadTheme() {
-    const saved = localStorage.getItem(THEME_KEY);
-    if (saved === 'light') document.body.classList.add('light');
-    else if (saved === 'catppuccin') document.body.classList.add('catppuccin');
-}
+const THEME_CYCLE = { dark: 'light', light: 'catppuccin', catppuccin: 'dark' };
 
 function toggleTheme() {
-    const body = document.body;
-    if (body.classList.contains('light')) {
-        body.classList.remove('light');
-        body.classList.add('catppuccin');
-        localStorage.setItem(THEME_KEY, 'catppuccin');
-    } else if (body.classList.contains('catppuccin')) {
-        body.classList.remove('catppuccin');
-        localStorage.setItem(THEME_KEY, 'dark');
-    } else {
-        body.classList.add('light');
-        localStorage.setItem(THEME_KEY, 'light');
-    }
+    const next = THEME_CYCLE[getTheme()];
+    document.body.classList.remove('light', 'catppuccin');
+    if (next !== 'dark') document.body.classList.add(next);
+    localStorage.setItem(THEME_KEY, next);
     renderTopbar();
-}
-
-function currentThemeIcon() {
-    if (document.body.classList.contains('light'))
-        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
-    if (document.body.classList.contains('catppuccin'))
-        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`;
-    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
-}
-
-function currentThemeTitle() {
-    if (document.body.classList.contains('light')) return 'Light — click for Catppuccin';
-    if (document.body.classList.contains('catppuccin')) return 'Catppuccin — click for dark';
-    return 'Dark — click for light';
 }
 
 // ─── View State ───────────────────────────────────────────────────────────────
 
 let activeView = 'today';       // 'today' | 'habits' | 'tracker'
 let activeCategory = null;      // category id or null (show all)
+let addingCategory = false;
 
 function setView(view, catId = null) {
     activeView = view;
@@ -85,8 +80,12 @@ async function handleSignOut() {
     window.location.replace('/');
 }
 
+let _sessionUserId = null;
+
 async function onSession(session) {
-    if (!session) { window.location.replace('/login'); return; }
+    if (!session) { _sessionUserId = null; window.location.replace('/login'); return; }
+    if (session.user.id === _sessionUserId) return; // token refresh — skip full re-init
+    _sessionUserId = session.user.id;
     setCurrentUser(session.user.id, session.user.email);
     try {
         await loadState();
@@ -198,20 +197,11 @@ function onCatDragEnd() {
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 const NAV = [
-    { id: 'today',   label: 'Today',      icon: iconSun()  },
-    { id: 'habits',  label: 'All habits', icon: iconList() },
-    { id: 'tracker', label: 'Tracker',    icon: iconCal()  },
+    { id: 'today',   label: 'Today',      icon: ICON_SUN  },
+    { id: 'habits',  label: 'All habits', icon: ICON_LIST },
+    { id: 'tracker', label: 'Tracker',    icon: ICON_CAL  },
 ];
 
-function iconSun() {
-    return `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
-}
-function iconList() {
-    return `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`;
-}
-function iconCal() {
-    return `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
-}
 function logoMark() {
     return `<svg class="logo-mark" viewBox="0 0 48 24" fill="none" aria-hidden="true"><path d="M24,12 C24,6 20,2 14,2 C8,2 4,6 4,12 C4,18 8,22 14,22 C20,22 24,18 24,12 C24,6 28,2 34,2 C40,2 44,6 44,12 C44,18 40,22 34,22 C28,22 24,18 24,12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
@@ -252,6 +242,7 @@ function renderSidebar() {
           <button class="sb-add" onclick="openAddCategory()" title="New category">+</button>
         </div>
         ${catsHtml || '<span style="padding:4px 10px;font-size:12px;color:var(--text3)">No categories yet</span>'}
+        ${addingCategory ? `<div class="sb-new-cat-wrap"><input id="sb-new-cat" class="sb-new-cat-input" type="text" placeholder="Category name…" /></div>` : ''}
       </div>
 
       <div class="sb-spacer"></div>
@@ -311,9 +302,9 @@ function renderTopbar() {
         `${i > 0 ? '<span class="sb-crumb-sep">/</span>' : ''}<span class="sb-crumb ${i === crumbs.length - 1 ? 'active' : 'dim'}">${esc(c)}</span>`
     ).join('');
 
-    const sidebarIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>`;
+    const themeMeta = THEME_META[getTheme()];
     topbar.innerHTML = `
-      <button class="sb-search-trigger" onclick="toggleSidebar()" title="Toggle sidebar" style="padding:0 8px;margin-right:2px">${sidebarIcon}</button>
+      <button class="sb-search-trigger" onclick="toggleSidebar()" title="Toggle sidebar" style="padding:0 8px;margin-right:2px">${SIDEBAR_ICON}</button>
       <div class="sb-crumbs">${crumbsHtml}</div>
       <div class="sb-topbar-spacer"></div>
       <button class="sb-search-trigger">
@@ -321,8 +312,8 @@ function renderTopbar() {
         Search
         <span class="kbd">⌘K</span>
       </button>
-      <button class="sb-search-trigger" onclick="toggleTheme()" title="${currentThemeTitle()}" style="padding:0 8px">
-        ${currentThemeIcon()}
+      <button class="sb-search-trigger" onclick="toggleTheme()" title="${themeMeta.title}" style="padding:0 8px">
+        ${themeMeta.icon}
       </button>
       ${actions}
       ${activeView === 'habits' && appMode === 'edit' ? `
@@ -422,20 +413,36 @@ function render() {
 // ─── UI Helpers ───────────────────────────────────────────────────────────────
 
 function openAddCategory() {
-    const name = window.prompt('New category name:');
-    if (!name?.trim()) return;
-    addCategory(name.trim());
-    render();
+    addingCategory = true;
+    renderSidebar();
+    const inp = document.getElementById('sb-new-cat');
+    if (!inp) return;
+    inp.focus();
+    inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter')  submitNewCategory();
+        if (e.key === 'Escape') cancelAddCategory();
+    });
+    inp.addEventListener('blur', () => setTimeout(() => { if (addingCategory) submitNewCategory(); }, 150));
+}
+
+function submitNewCategory() {
+    const name = document.getElementById('sb-new-cat')?.value.trim();
+    addingCategory = false;
+    if (name) { addCategory(name); render(); }
+    else renderSidebar();
+}
+
+function cancelAddCategory() {
+    addingCategory = false;
+    renderSidebar();
 }
 
 function openAddHabit() {
-    if (appMode !== 'edit') { setAppMode('edit'); return; }
-    // in edit mode, focus the add-habit area for the active category
-    if (activeCategory) {
-        document.querySelector(`#cat-${activeCategory} .add-habit-btn`)?.click();
-    } else {
-        state.length && document.querySelector('.add-habit-btn')?.click();
-    }
+    if (appMode !== 'edit') setAppMode('edit'); // renders edit mode synchronously
+    const btn = activeCategory
+        ? document.querySelector(`#cat-${activeCategory} .add-habit-btn`)
+        : document.querySelector('.add-habit-btn');
+    btn?.click();
 }
 
 function submitCategoryInput() {
@@ -473,10 +480,23 @@ function attachAddCatHandlers() {
     });
 }
 
+function showSaveError() {
+    let toast = document.getElementById('save-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'save-toast';
+        toast.className = 'save-toast';
+        toast.textContent = 'Save failed — check your connection.';
+        document.body.appendChild(toast);
+    }
+    toast.classList.add('visible');
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => toast.classList.remove('visible'), 4000);
+}
+
 function attachUiHandlers() {
-    loadTheme();
-    if (localStorage.getItem(SIDEBAR_KEY) === 'closed') document.body.classList.add('sidebar-closed');
     window.addEventListener("habit-import", () => { loadMode(); render(); });
+    window.addEventListener("save-error", showSaveError);
     document.addEventListener("click", () => { closeExportMenu(); closeProfileMenu(); });
 
     const appEl = document.getElementById("app");
@@ -496,7 +516,7 @@ Object.assign(window, {
     openAddCategory,
     openAddHabit,
     toggleCategory:   cid              => { toggleCategory(cid);                            render(); },
-    deleteCategory:   cid              => { if (deleteCategory(cid))                        render(); },
+    deleteCategory:   cid              => { if (confirm("Delete this category and all its habits?")) { deleteCategory(cid); render(); } },
     addHabit:         cid              => { addHabit(cid);                                  render(); },
     deleteHabit:      (cid, hid)       => { deleteHabit(cid, hid);                          render(); },
     toggleHabit:      (cid, hid)       => { toggleHabit(cid, hid);                          render(); },

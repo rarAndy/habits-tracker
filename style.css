@@ -1428,6 +1428,22 @@ body.sidebar-closed .sb {
 }
 .sb-add:hover { background: rgba(255,255,255,0.08); color: var(--text); }
 
+.sb-new-cat-wrap {
+  padding: 4px 2px;
+}
+.sb-new-cat-input {
+  width: 100%;
+  padding: 5px 8px;
+  font: 400 13px/1.3 var(--sans);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 4px;
+  color: var(--text);
+  outline: none;
+}
+.sb-new-cat-input::placeholder { color: rgba(255,255,255,0.28); }
+.sb-new-cat-input:focus { border-color: var(--accent); background: rgba(255,255,255,0.09); }
+
 .sb-item, .sb-cat {
   appearance: none; border: 0; background: transparent;
   width: 100%; text-align: left;
@@ -1962,6 +1978,9 @@ body.lab.light .sb-brand .logo:hover { background: var(--item-hover); color: var
 body.lab.light .sb-section-head .eyebrow { color: var(--text3); }
 body.lab.light .sb-add { color: var(--text3); }
 body.lab.light .sb-add:hover { background: var(--item-hover); color: var(--text); }
+body.lab.light .sb-new-cat-input { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+body.lab.light .sb-new-cat-input::placeholder { color: var(--text3); }
+body.lab.light .sb-new-cat-input:focus { border-color: var(--accent); background: var(--surface); }
 body.lab.light .sb-item,
 body.lab.light .sb-cat { color: var(--text2); }
 body.lab.light .sb-item.on,
@@ -2189,6 +2208,9 @@ body.lab.catppuccin .sb-brand .logo:hover { background: var(--item-hover); color
 body.lab.catppuccin .sb-section-head .eyebrow { color: var(--text3); }
 body.lab.catppuccin .sb-add { color: var(--text3); }
 body.lab.catppuccin .sb-add:hover { background: var(--item-hover); color: var(--text); }
+body.lab.catppuccin .sb-new-cat-input { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+body.lab.catppuccin .sb-new-cat-input::placeholder { color: var(--text3); }
+body.lab.catppuccin .sb-new-cat-input:focus { border-color: var(--accent); background: var(--surface); }
 body.lab.catppuccin .sb-item,
 body.lab.catppuccin .sb-cat { color: var(--text2); }
 body.lab.catppuccin .sb-item.on,
@@ -2361,3 +2383,26 @@ body.lab.catppuccin .empty-state p:first-child { color: var(--text2); }
 body.lab.catppuccin .toolbar-dropdown-menu { background: var(--surface); border-color: rgba(205,214,244,0.14); }
 body.lab.catppuccin .toolbar-dropdown-menu button { color: var(--text); }
 body.lab.catppuccin .toolbar-dropdown-menu button:hover { background: var(--surface2); }
+
+/* ── Save-error toast ──────────────────────────────────────── */
+.save-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: var(--danger);
+  color: #fff;
+  font-size: 13px;
+  padding: 9px 18px;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s, transform .2s;
+  z-index: 9999;
+  white-space: nowrap;
+}
+.save-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

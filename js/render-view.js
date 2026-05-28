@@ -1,7 +1,5 @@
-import { esc, microLabels, microLabelHeader } from './helpers.js';
+import { esc, microLabels, microLabelHeader, checkSvg } from './helpers.js';
 import { isCompletedToday, getStreak } from './completions.js';
-
-const checkSvg = `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,6 4.5,9.5 10.5,2.5"/></svg>`;
 
 // ─── Habit card (new ss-hcard design) ────────────────────────────────────────
 
@@ -25,8 +23,8 @@ function renderHabitCard(c, h) {
     const microStrip = microCount > 0 ? `
       <div class="ss-hcard-loop">
         ${h.microhabits.slice(0, 5).map((m, i) => `
-          <span class="ss-orb ${i < 2 ? 'done' : ''}" title="${esc(m.description || '')}">${i < 2 ? '✓' : i + 1}</span>
-          ${i < Math.min(microCount, 5) - 1 ? `<span class="ss-line ${i < 1 ? 'done' : ''}"></span>` : ''}
+          <span class="ss-orb" title="${esc(m.description || '')}">${i + 1}</span>
+          ${i < Math.min(microCount, 5) - 1 ? `<span class="ss-line"></span>` : ''}
         `).join('')}
         <span class="meta" style="margin-left:10px">${microCount} micro</span>
       </div>` : '';
@@ -139,42 +137,3 @@ export function renderCategoryHabitsNew(c, showHeader = true) {
     </div>`;
 }
 
-// ─── Legacy: all-categories with gap divs (for DnD between categories) ───────
-
-export function renderWithCatGaps(cats) {
-    const gap = i =>
-        `<div class="cat-drop-gap" ondragover="onCatGapDragOver(event)" ondragleave="onCatGapDragLeave(event)" ondrop="onCatGapDrop(${i},event)"></div>`;
-    return gap(0) + cats.map((c, i) => renderLegacyCategoryBlock(c) + gap(i + 1)).join('');
-}
-
-function renderLegacyCategoryBlock(c) {
-    const gap = i =>
-        `<div class="habit-drop-gap" ondragover="onHabitGapDragOver('${c.id}',event)" ondragleave="onHabitGapDragLeave(event)" ondrop="onHabitGapDrop('${c.id}',${i},event)"></div>`;
-
-    const body = c.open !== false ? `
-      <div class="ss-habits-list" style="padding:0 0 8px">
-        ${c.habits.length
-            ? gap(0) + c.habits.map((h, i) => renderHabitCard(c, h) + gap(i + 1)).join('')
-            : `<p class="empty-msg" style="padding:8px 0">No habits yet.</p>`}
-        <button class="add-dashed" onclick="addHabit('${c.id}')">+ Add habit to ${esc(c.name)}</button>
-      </div>` : '';
-
-    return `
-    <div class="ss-cat-block" id="cat-${c.id}"
-      draggable="true"
-      ondragstart="onCatDragStart('${c.id}',event)"
-      ondragend="onCatDragEnd()">
-      <div class="ss-cat-block-head">
-        <button class="ss-cat-toggle"
-          onclick="toggleCategory('${c.id}')">
-          <span class="ss-cat-block-name">${esc(c.name)}</span>
-          <span class="ss-cat-block-count">${c.habits.length} habit${c.habits.length !== 1 ? 's' : ''}</span>
-          <span class="chevron ${c.open !== false ? 'open' : ''}">&#9660;</span>
-        </button>
-      </div>
-      ${body}
-    </div>`;
-}
-
-// Keep old export name for backward compat
-export { renderLegacyCategoryBlock as renderCategoryView };

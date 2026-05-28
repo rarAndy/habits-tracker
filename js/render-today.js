@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { esc } from './helpers.js';
+import { esc, checkSvg } from './helpers.js';
 import { isCompletedToday, getStreak } from './completions.js';
 
 function getTimeOfDay() {
@@ -12,7 +12,6 @@ function getTimeOfDay() {
 function renderTodayHabit(h) {
     const done = isCompletedToday(h.id);
     const streak = getStreak(h.id);
-    const checkSvg = `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,6 4.5,9.5 10.5,2.5"/></svg>`;
     const typeChip = h.type === 'positive'
         ? `<span class="chip pos dot">Positive</span>`
         : `<span class="chip neg dot">Negative</span>`;
