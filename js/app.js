@@ -9,12 +9,69 @@ import {
     setCatDragSrc, clearCatDragSrc, isCatDragging, dragSrcCatId, insertCategoryAt,
 } from './state.js';
 
+import { esc } from './helpers.js';
 import { renderCategoryEdit } from './render-edit.js';
-import { renderWithCatGaps } from './render-view.js';
-import { loadCompletions, toggleCompletion } from './completions.js';
+import { renderCategoryHabitsNew } from './render-view.js';
+import { renderToday } from './render-today.js';
+import { renderTracker } from './render-tracker.js';
+import { loadCompletions, toggleCompletion, getGlobalStreak } from './completions.js';
 import { exportJSON, exportCSV, triggerImport, handleImport } from './io.js';
 import { applyTemplate } from './template.js';
 import { signOut, onAuthStateChange } from './auth.js';
+
+// ─── Theme ────────────────────────────────────────────────────────────────────
+
+const THEME_KEY = 'loopabl-theme';
+const SIDEBAR_KEY = 'loopabl-sidebar';
+
+const SIDEBAR_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>`;
+
+const ICON_SUN  = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+const ICON_MOON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+const ICON_STAR = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`;
+const ICON_LIST = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`;
+const ICON_CAL  = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+
+const THEME_META = {
+    light:      { icon: ICON_SUN,  title: 'Light — click for Catppuccin' },
+    catppuccin: { icon: ICON_STAR, title: 'Catppuccin — click for dark' },
+    dark:       { icon: ICON_MOON, title: 'Dark — click for light' },
+};
+
+function getTheme() {
+    const cl = document.body.classList;
+    if (cl.contains('light')) return 'light';
+    if (cl.contains('catppuccin')) return 'catppuccin';
+    return 'dark';
+}
+
+function toggleSidebar() {
+    const isClosed = document.body.classList.toggle('sidebar-closed');
+    localStorage.setItem(SIDEBAR_KEY, isClosed ? 'closed' : 'open');
+}
+
+const THEME_CYCLE = { dark: 'light', light: 'catppuccin', catppuccin: 'dark' };
+
+function toggleTheme() {
+    const next = THEME_CYCLE[getTheme()];
+    document.body.classList.remove('light', 'catppuccin');
+    if (next !== 'dark') document.body.classList.add(next);
+    localStorage.setItem(THEME_KEY, next);
+    renderTopbar();
+}
+
+// ─── View State ───────────────────────────────────────────────────────────────
+
+let activeView = 'today';       // 'today' | 'habits' | 'tracker'
+let activeCategory = null;      // category id or null (show all)
+let addingCategory = false;
+
+function setView(view, catId = null) {
+    activeView = view;
+    activeCategory = catId ?? null;
+    if (view === 'habits' && appMode !== 'view' && appMode !== 'edit') persistMode('view');
+    render();
+}
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -23,8 +80,12 @@ async function handleSignOut() {
     window.location.replace('/');
 }
 
+let _sessionUserId = null;
+
 async function onSession(session) {
-    if (!session) { window.location.replace('/login'); return; }
+    if (!session) { _sessionUserId = null; window.location.replace('/login'); return; }
+    if (session.user.id === _sessionUserId) return; // token refresh — skip full re-init
+    _sessionUserId = session.user.id;
     setCurrentUser(session.user.id, session.user.email);
     try {
         await loadState();
@@ -40,8 +101,6 @@ async function onSession(session) {
     }
     loadMode();
     render();
-    const profileBtn = document.getElementById("profile-btn");
-    if (profileBtn) profileBtn.title = currentUsername ?? "Profile";
 }
 
 // ─── Mode ─────────────────────────────────────────────────────────────────────
@@ -95,8 +154,6 @@ function onHabitDragEnd() {
     );
 }
 
-// ─── Category Drag-and-Drop ───────────────────────────────────────────────────
-
 function onCatDragStart(cid, e) {
     setCatDragSrc(cid);
     e.dataTransfer.effectAllowed = "move";
@@ -137,30 +194,256 @@ function onCatDragEnd() {
     );
 }
 
-// ─── Main Render ──────────────────────────────────────────────────────────────
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-function render() {
-    const root = document.getElementById("app");
-    if (!root) return;
+const NAV = [
+    { id: 'today',   label: 'Today',      icon: ICON_SUN  },
+    { id: 'habits',  label: 'All habits', icon: ICON_LIST },
+    { id: 'tracker', label: 'Tracker',    icon: ICON_CAL  },
+];
 
-    const isView = appMode === "view";
-    root.classList.toggle("app--view", isView);
-    document.body.classList.toggle("mode-view", isView);
-    document.getElementById("mode-edit-btn")?.classList.toggle("active", !isView);
-    document.getElementById("mode-view-btn")?.classList.toggle("active", isView);
+function logoMark() {
+    return `<svg class="logo-mark" viewBox="0 0 48 24" fill="none" aria-hidden="true"><path d="M24,12 C24,6 20,2 14,2 C8,2 4,6 4,12 C4,18 8,22 14,22 C20,22 24,18 24,12 C24,6 28,2 34,2 C40,2 44,6 44,12 C44,18 40,22 34,22 C28,22 24,18 24,12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
 
-    if (appMode === "view") {
-        root.innerHTML = state.length
-            ? renderWithCatGaps(state)
-            : `<div class="empty-state"><p>Nothing to show yet.</p><p>Switch to Edit Mode to add habits.</p></div>`;
+function renderSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+
+    const navHtml = NAV.map(n => {
+        const isActive = activeView === n.id && activeCategory === null;
+        return `<button class="sb-item${isActive ? ' on' : ''}" onclick="setView('${n.id}')">${n.icon} ${esc(n.label)}</button>`;
+    }).join('');
+
+    const catsHtml = state.map(c => {
+        const isActive = activeView === 'habits' && activeCategory === c.id;
+        return `
+          <button class="sb-cat${isActive ? ' on' : ''}" onclick="setView('habits','${c.id}')">
+            <span class="sb-cat-dot"></span>
+            <span>${esc(c.name)}</span>
+            <span class="sb-cat-n">${c.habits.length}</span>
+          </button>`;
+    }).join('');
+
+    const initials = currentUsername ? currentUsername[0].toUpperCase() : 'A';
+    const streak = getGlobalStreak();
+    const streakLabel = streak > 0 ? `${streak}-day streak` : 'No streak yet';
+
+    sidebar.innerHTML = `
+      <div class="sb-brand">
+        <a href="/" class="logo">${logoMark()} Loopabl</a>
+      </div>
+
+      <div class="sb-section">${navHtml}</div>
+
+      <div class="sb-section">
+        <div class="sb-section-head">
+          <span class="eyebrow">Categories</span>
+          <button class="sb-add" onclick="openAddCategory()" title="New category">+</button>
+        </div>
+        ${catsHtml || '<span style="padding:4px 10px;font-size:12px;color:var(--text3)">No categories yet</span>'}
+        ${addingCategory ? `<div class="sb-new-cat-wrap"><input id="sb-new-cat" class="sb-new-cat-input" type="text" placeholder="Category name…" /></div>` : ''}
+      </div>
+
+      <div class="sb-spacer"></div>
+
+      <div class="profile-wrap-sb">
+        <button class="sb-foot" onclick="toggleProfileMenu(event)">
+          <div class="sb-avatar">${esc(initials)}</div>
+          <div style="display:flex;flex-direction:column;text-align:left;min-width:0">
+            <span style="font-size:12.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(currentUsername || 'Account')}</span>
+            <span style="font-size:11px;color:var(--text3)">${esc(streakLabel)}</span>
+          </div>
+          <span style="margin-left:auto;color:var(--text3);font-size:16px;flex-shrink:0">⋯</span>
+        </button>
+        <div id="profile-menu" class="profile-menu">
+          <a href="/profile" class="profile-menu-item">Edit Profile</a>
+          <button class="profile-menu-item profile-menu-danger" type="button" onclick="handleSignOut()">Sign Out</button>
+        </div>
+      </div>`;
+}
+
+// ─── Topbar ───────────────────────────────────────────────────────────────────
+
+function renderTopbar() {
+    const topbar = document.getElementById('topbar');
+    if (!topbar) return;
+
+    let crumbs = [];
+    let actions = '';
+
+    if (activeView === 'today') {
+        const d = new Date();
+        const day = d.toLocaleDateString('en-US', { weekday: 'long' });
+        const date = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+        crumbs = ['Today', `${day} · ${date}`];
+
+    } else if (activeView === 'habits') {
+        const cat = activeCategory ? state.find(c => c.id === activeCategory) : null;
+        crumbs = cat ? ['Habits', cat.name] : ['Habits'];
+        const isView = appMode === 'view';
+        actions = `
+          <div class="seg">
+            <button class="${isView ? 'on' : ''}" onclick="setAppMode('view')">View</button>
+            <button class="${!isView ? 'on' : ''}" onclick="setAppMode('edit')">Edit</button>
+          </div>
+          ${isView ? `<button class="btn ghost" onclick="sortAllByPriority()">Sort</button>` : ''}
+          <button class="btn primary" onclick="openAddHabit()">+ New habit</button>`;
+
+    } else if (activeView === 'tracker') {
+        crumbs = ['Tracker'];
+        actions = `
+          <button class="btn ghost" onclick="exportJSON()">Export</button>
+          <button class="btn ghost" onclick="triggerImport()">Import</button>
+          <input type="file" id="import-input" accept=".json,.csv" style="display:none" onchange="handleImport(event)" />`;
+    }
+
+    const crumbsHtml = crumbs.map((c, i) =>
+        `${i > 0 ? '<span class="sb-crumb-sep">/</span>' : ''}<span class="sb-crumb ${i === crumbs.length - 1 ? 'active' : 'dim'}">${esc(c)}</span>`
+    ).join('');
+
+    const themeMeta = THEME_META[getTheme()];
+    topbar.innerHTML = `
+      <button class="sb-search-trigger" onclick="toggleSidebar()" title="Toggle sidebar" style="padding:0 8px;margin-right:2px">${SIDEBAR_ICON}</button>
+      <div class="sb-crumbs">${crumbsHtml}</div>
+      <div class="sb-topbar-spacer"></div>
+      <button class="sb-search-trigger">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search
+        <span class="kbd">⌘K</span>
+      </button>
+      <button class="sb-search-trigger" onclick="toggleTheme()" title="${themeMeta.title}" style="padding:0 8px">
+        ${themeMeta.icon}
+      </button>
+      ${actions}
+      ${activeView === 'habits' && appMode === 'edit' ? `
+        <div class="toolbar-dropdown">
+          <button class="btn ghost toolbar-btn-caret" onclick="toggleExportMenu(event)">Export <span class="btn-caret">▾</span></button>
+          <div class="toolbar-dropdown-menu" id="export-menu">
+            <button onclick="exportJSON(); closeExportMenu()">JSON</button>
+            <button onclick="exportCSV(); closeExportMenu()">CSV</button>
+          </div>
+        </div>
+        <button class="btn ghost" onclick="triggerImport()">Import</button>
+        <input type="file" id="import-input" accept=".json,.csv" style="display:none" onchange="handleImport(event)" />
+      ` : ''}`;
+}
+
+// ─── Content ──────────────────────────────────────────────────────────────────
+
+function renderContent() {
+    const app = document.getElementById('app');
+    if (!app) return;
+
+    if (activeView === 'today') {
+        app.innerHTML = renderToday(currentUsername);
+        return;
+    }
+
+    if (activeView === 'tracker') {
+        app.innerHTML = renderTracker();
+        return;
+    }
+
+    // habits view
+    const isView = appMode === 'view';
+    app.classList.toggle('app--view', isView);
+
+    if (!isView) {
+        // edit mode
+        const wrap = document.createElement('div');
+        wrap.className = 'ss-edit-wrap';
+        if (!state.length) {
+            wrap.innerHTML = `<div class="empty-state"><p>No categories yet.</p><p>Add one below.</p></div>`;
+        } else if (activeCategory) {
+            const cat = state.find(c => c.id === activeCategory);
+            wrap.innerHTML = cat ? renderCategoryEdit(cat) : '';
+        } else {
+            wrap.innerHTML = state.map(renderCategoryEdit).join('');
+        }
+        // add-bar for edit mode
+        const addBar = document.createElement('div');
+        addBar.className = 'add-bar';
+        addBar.innerHTML = `
+          <input id="new-cat" type="text" placeholder="New category name…" />
+          <button id="add-cat-btn" class="btn-primary" type="button">+ Add Category</button>`;
+        app.innerHTML = '';
+        app.appendChild(addBar);
+        app.appendChild(wrap);
+        attachAddCatHandlers();
     } else {
-        root.innerHTML = state.length
-            ? state.map(renderCategoryEdit).join("")
-            : `<div class="empty-state"><p>No categories yet.</p><p>Add one using the field above.</p></div>`;
+        // view mode
+        if (!state.length) {
+            app.innerHTML = `<div class="ss-habits"><div class="empty-state"><p>No habits yet.</p><p>Switch to Edit to add some.</p></div></div>`;
+            return;
+        }
+        if (activeCategory) {
+            const cat = state.find(c => c.id === activeCategory);
+            app.innerHTML = cat
+                ? `<div class="ss-habits">${renderCategoryHabitsNew(cat)}</div>`
+                : `<div class="ss-habits"><p class="empty-state">Category not found.</p></div>`;
+        } else {
+            app.innerHTML = `<div class="ss-habits">${renderAllCategories()}</div>`;
+        }
     }
 }
 
-// ─── UI Handlers ──────────────────────────────────────────────────────────────
+function renderAllCategories() {
+    return state.map(c => `
+      <div class="ss-cat-block" id="cat-${c.id}">
+        <div class="ss-cat-block-head">
+          <button class="ss-cat-toggle" onclick="toggleCategory('${c.id}')">
+            <span class="ss-cat-block-name">${esc(c.name)}</span>
+            <span class="ss-cat-block-count">${c.habits.length} habit${c.habits.length !== 1 ? 's' : ''}</span>
+            <span class="chevron ${c.open ? 'open' : ''}">&#9660;</span>
+          </button>
+        </div>
+        ${c.open !== false ? renderCategoryHabitsNew(c, false) : ''}
+      </div>`).join('');
+}
+
+// ─── Main Render ──────────────────────────────────────────────────────────────
+
+function render() {
+    renderSidebar();
+    renderTopbar();
+    renderContent();
+}
+
+// ─── UI Helpers ───────────────────────────────────────────────────────────────
+
+function openAddCategory() {
+    addingCategory = true;
+    renderSidebar();
+    const inp = document.getElementById('sb-new-cat');
+    if (!inp) return;
+    inp.focus();
+    inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter')  submitNewCategory();
+        if (e.key === 'Escape') cancelAddCategory();
+    });
+    inp.addEventListener('blur', () => setTimeout(() => { if (addingCategory) submitNewCategory(); }, 150));
+}
+
+function submitNewCategory() {
+    const name = document.getElementById('sb-new-cat')?.value.trim();
+    addingCategory = false;
+    if (name) { addCategory(name); render(); }
+    else renderSidebar();
+}
+
+function cancelAddCategory() {
+    addingCategory = false;
+    renderSidebar();
+}
+
+function openAddHabit() {
+    if (appMode !== 'edit') setAppMode('edit'); // renders edit mode synchronously
+    const btn = activeCategory
+        ? document.querySelector(`#cat-${activeCategory} .add-habit-btn`)
+        : document.querySelector('.add-habit-btn');
+    btn?.click();
+}
 
 function submitCategoryInput() {
     const inp = document.getElementById("new-cat");
@@ -190,12 +473,30 @@ function closeProfileMenu() {
     document.getElementById("profile-menu")?.classList.remove("open");
 }
 
-function attachUiHandlers() {
+function attachAddCatHandlers() {
     document.getElementById("add-cat-btn")?.addEventListener("click", submitCategoryInput);
     document.getElementById("new-cat")?.addEventListener("keydown", e => {
         if (e.key === "Enter") submitCategoryInput();
     });
+}
+
+function showSaveError() {
+    let toast = document.getElementById('save-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'save-toast';
+        toast.className = 'save-toast';
+        toast.textContent = 'Save failed — check your connection.';
+        document.body.appendChild(toast);
+    }
+    toast.classList.add('visible');
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => toast.classList.remove('visible'), 4000);
+}
+
+function attachUiHandlers() {
     window.addEventListener("habit-import", () => { loadMode(); render(); });
+    window.addEventListener("save-error", showSaveError);
     document.addEventListener("click", () => { closeExportMenu(); closeProfileMenu(); });
 
     const appEl = document.getElementById("app");
@@ -210,9 +511,12 @@ function attachUiHandlers() {
 // ─── Window Bindings (for inline HTML event handlers) ────────────────────────
 
 Object.assign(window, {
+    setView,
     setAppMode,
+    openAddCategory,
+    openAddHabit,
     toggleCategory:   cid              => { toggleCategory(cid);                            render(); },
-    deleteCategory:   cid              => { if (deleteCategory(cid))                        render(); },
+    deleteCategory:   cid              => { if (confirm("Delete this category and all its habits?")) { deleteCategory(cid); render(); } },
     addHabit:         cid              => { addHabit(cid);                                  render(); },
     deleteHabit:      (cid, hid)       => { deleteHabit(cid, hid);                          render(); },
     toggleHabit:      (cid, hid)       => { toggleHabit(cid, hid);                          render(); },
@@ -242,6 +546,8 @@ Object.assign(window, {
     handleImport,
     handleSignOut,
     toggleProfileMenu,
+    toggleTheme,
+    toggleSidebar,
 });
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────

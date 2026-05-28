@@ -58,12 +58,21 @@ export async function checkUsernameAvailable(username) {
     return data === null;
 }
 
+let _saveTimer = null;
 export function saveState() {
     if (!currentUserId) return;
-    supabase
-        .from('habits_data')
-        .upsert({ user_id: currentUserId, data: state, updated_at: new Date().toISOString() })
-        .then(({ error }) => { if (error) console.error('Save failed:', error); });
+    clearTimeout(_saveTimer);
+    _saveTimer = setTimeout(() => {
+        supabase
+            .from('habits_data')
+            .upsert({ user_id: currentUserId, data: state, updated_at: new Date().toISOString() })
+            .then(({ error }) => {
+                if (error) {
+                    console.error('Save failed:', error);
+                    window.dispatchEvent(new CustomEvent('save-error', { detail: error.message }));
+                }
+            });
+    }, 400);
 }
 
 export function loadMode() {
@@ -89,11 +98,9 @@ export function addCategory(name) {
 }
 
 export function deleteCategory(cid) {
-    if (!confirm("Delete this category and all its habits?")) return false;
     const idx = state.findIndex(c => c.id === cid);
     if (idx !== -1) state.splice(idx, 1);
     saveState();
-    return true;
 }
 
 export function toggleCategory(cid) {
@@ -126,8 +133,12 @@ export function toggleHabit(cid, hid) {
     saveState();
 }
 
+const HABIT_FIELDS = new Set(['name', 'type', 'priority', 'cue', 'craving', 'response', 'reward', 'open']);
+const MICRO_FIELDS = new Set(['description', 'r1', 'r2', 'r3', 'r4']);
+
 // Returns true when a full re-render is needed (type badge change).
 export function updateHabit(cid, hid, field, value) {
+    if (!HABIT_FIELDS.has(field)) return false;
     const h = findHabit(cid, hid);
     if (!h) return false;
     h[field] = value;
@@ -150,6 +161,7 @@ export function deleteMicrohabit(cid, hid, mid) {
 }
 
 export function updateMicrohabit(cid, hid, mid, field, value) {
+    if (!MICRO_FIELDS.has(field)) return;
     const m = findMicro(cid, hid, mid);
     if (!m) return;
     m[field] = field !== "description" ? Number(value) : value;

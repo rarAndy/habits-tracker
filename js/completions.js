@@ -1,12 +1,9 @@
 import { supabase } from './supabase.js';
+import { localDateStr } from './helpers.js';
 
 // Map<habitId, Set<"YYYY-MM-DD">>
 const completions = new Map();
 let currentUserId = null;
-
-function localDateStr(d = new Date()) {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 export async function loadCompletions(userId) {
     currentUserId = userId;
@@ -45,6 +42,36 @@ export function getStreak(habitId) {
 
     let streak = 0;
     while (dates.has(localDateStr(d))) {
+        streak++;
+        d.setDate(d.getDate() - 1);
+    }
+    return streak;
+}
+
+export function getAllDatesWithCounts() {
+    const result = new Map();
+    for (const dates of completions.values()) {
+        for (const date of dates) {
+            result.set(date, (result.get(date) ?? 0) + 1);
+        }
+    }
+    return result;
+}
+
+export function getGlobalStreak() {
+    const dateCounts = getAllDatesWithCounts();
+    if (dateCounts.size === 0) return 0;
+
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+
+    if (!dateCounts.has(localDateStr(d))) {
+        d.setDate(d.getDate() - 1);
+        if (!dateCounts.has(localDateStr(d))) return 0;
+    }
+
+    let streak = 0;
+    while (dateCounts.has(localDateStr(d))) {
         streak++;
         d.setDate(d.getDate() - 1);
     }
